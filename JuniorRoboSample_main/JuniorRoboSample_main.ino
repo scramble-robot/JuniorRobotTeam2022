@@ -1,8 +1,13 @@
 //
 // JuniorRoboSample
+// ジュニアロボットチーム用サンプルロボット　メインプログラム
 //
 // 初版作成：2022.9.6
 //
+
+// プロトタイプ宣言
+void pinInit_drive(void);			// 駆動系 ピン設定
+void drive(int vx, int vy);		// 駆動(メカナム)動作
 
 //**********************
 // ピン定義
@@ -29,15 +34,22 @@ const int stick_y = A1;		// Analog 0番ピンにアナログスティックを�
 const int SW1 = A3;				// Analog 0番ピンにアナログスティックを接続
 const int SW2 = A4;				// Analog 0番ピンにアナログスティックを接続
 
-int vx = 0;		// アナログスティックX軸の傾きを入れる変数
-int vy = 0;		// アナログスティックY軸の傾きを入れる変数
-
 
 //**********************
 // 初期設定関数
 //**********************
-
 void setup()
+{
+	pinInit_drive();							// 駆動系(メカナム)ピン初期化
+
+	pinMode(SW1, INPUT_PULLUP);		// SW1を入力モード（プルアップあり）で使用
+	pinMode(SW2, INPUT_PULLUP);		// SW2を入力モード（プルアップあり）で使用
+}
+
+/////////////////////
+// 駆動系 ピン設定
+/////////////////////
+void pinInit_drive(void)
 {
 	pinMode(FL_IN1, OUTPUT);		// FL_IN1を出力モードで使用
 	pinMode(FL_IN2, OUTPUT);		// FL_IN2を出力モードで使用
@@ -58,9 +70,6 @@ void setup()
 	pinMode(RR_IN2, OUTPUT);		// RR_IN2を出力モードで使用
 	pinMode(RR_EN, OUTPUT);			// RR_ENを出力モードで使用
 	analogWrite(RR_EN, 255);		// モータ出力100％
-
-	pinMode(SW1, INPUT_PULLUP);		// SW1を入力モード（プルアップあり）で使用
-	pinMode(SW2, INPUT_PULLUP);		// SW2を入力モード（プルアップあり）で使用
 }
 
 
@@ -69,9 +78,22 @@ void setup()
 //**********************
 void loop()
 {
+	int vx = 0;		// アナログスティックX軸の傾きを入れる変数
+	int vy = 0;		// アナログスティックY軸の傾きを入れる変数
+
 	vx = analogRead( stick_x );   // アナログスティックX軸の電圧を測定
 	vy = analogRead( stick_y );   // アナログスティックY軸の電圧を測定
 
+	drive(vx,vy);
+}
+
+/////////////////////////////
+// 駆動（メカナム）動作
+// in		vx: Xスティックの傾き
+//			vy: Yスティックの傾き
+/////////////////////////////
+void drive(int vx, int vy)
+{
 	if(vx < 411){	// スティックが左に傾いていれば
 		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
 		digitalWrite(FL_IN2, LOW);
@@ -111,8 +133,8 @@ void loop()
 		digitalWrite(RL_IN2, LOW);
 		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
 		digitalWrite(RR_IN2, HIGH);
-	}
-	else if(digitalRead(SW1)==0){	// SW1が押されたら
+	}else
+	if(digitalRead(SW1)==0){	// SW1が押されたら
 		digitalWrite(FL_IN1, LOW);	// 左前モータを逆回転
 		digitalWrite(FL_IN2, HIGH);
 		digitalWrite(FR_IN1, LOW);	// 右前モータを逆回転
@@ -121,8 +143,7 @@ void loop()
 		digitalWrite(RL_IN2, HIGH);
 		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
 		digitalWrite(RR_IN2, HIGH);
-	}
-	else
+	}else
 	if(digitalRead(SW2)==0){	// SW2が押されたら
 		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
 		digitalWrite(FL_IN2, LOW);
