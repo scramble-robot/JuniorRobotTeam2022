@@ -28,11 +28,11 @@ const int RR_IN1 = 12;		// 12番ピンに右後モータのIN3を接続
 const int RR_IN2 = 13;		// 13番ピンに右後モータのIN4を接続
 const int RR_EN  = 11;		// 11番ピンに右後モータのENBを接続
 
-const int stick_x = A0;		// Analog 0番ピンにアナログスティックを接続
-const int stick_y = A1;		// Analog 0番ピンにアナログスティックを接続
+const int stick_x = A0;		// Analog 0番ピンにアナログスティックX軸を接続
+const int stick_y = A1;		// Analog 1番ピンにアナログスティックY軸を接続
 
-const int SW1 = A3;				// Analog 0番ピンにアナログスティックを接続
-const int SW2 = A4;				// Analog 0番ピンにアナログスティックを接続
+const int SW1 = A3;				// Analog 3番ピンにスイッチ1を接続
+const int SW2 = A4;				// Analog 4番ピンにスイッチ2を接続
 
 
 //**********************
