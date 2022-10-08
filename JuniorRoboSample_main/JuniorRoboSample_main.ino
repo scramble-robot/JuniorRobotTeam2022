@@ -8,9 +8,21 @@
 #include <Servo.h>
 
 // プロトタイプ宣言
-void pinInit_drive(void);			// 駆動系 ピン設定
-void pinInit_arm(void);       // アーム系 ピン設定
-void drive(int vx, int vy);		// 駆動(メカナム)動作
+void pinInit_drive(void);                 // 駆動系 ピン設定
+void pinInit_arm(void);                   // アーム系 ピン設定
+void drive(int vx, int vy, int emg);      // 駆動(メカナム)動作
+void dataProcess(uint8_t data[]);         // 受信データ解析
+
+//**********************
+// 各種設定
+//**********************
+#define   TRANS_BITRATE   115200          // 通信速度
+
+#define   OUTVAL_MAX      30				      // コントローラから送信されるアナログスティック最大値
+#define   OUTVAL_HALF     (OUTVAL_MAX/2)	// 停止時のアナログスティック値
+#define   PWM_MAX         255				      // 最大出力
+
+#define   TRANSDATANUM    8               // コントローラから1度に届くデータ個数
 
 //**********************
 // ピン定義
@@ -66,6 +78,8 @@ const int SW2 = A4;				// Analog 4番ピンにスイッチ2を接続
 //**********************
 void setup()
 {
+	Serial.begin(TRANS_BITRATE);
+
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
   pinInit_arm();                // アーム系ピン初期化
   servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
@@ -124,23 +138,66 @@ void pinInit_arm(void)
 //**********************
 // ループ関数
 //**********************
-void loop()
-{
-	int vx = 0;		// アナログスティックX軸の傾きを入れる変数
-	int vy = 0;		// アナログスティックY軸の傾きを入れる変数
-
-	vx = analogRead( stick_x );   // アナログスティックX軸の電圧を測定
-	vy = analogRead( stick_y );   // アナログスティックY軸の電圧を測定
-
-	drive(vx,vy);
+void loop(){
+  // コントローラからデータを受信
+  int serialCount = Serial.available();
+  for(int i=0; i<serialCount; i++){
+    static int count = 0;
+    static uint8_t rxData[TRANSDATANUM];
+    int data = Serial.read();
+    if((data&0x07)!=count){
+      count = 0;
+      continue;
+    }
+    else{
+      rxData[count] = data;
+      count++;
+      if(count == TRANSDATANUM){
+        count = 0;
+        // 受信データ解析
+        dataProcess(rxData);
+      }
+    }
+  }
 }
 
-/////////////////////////////
-// 駆動（メカナム）動作
-// in		vx: Xスティックの傾き
-//			vy: Yスティックの傾き
-/////////////////////////////
-void drive(int vx, int vy)
+///////////////////////////////////////////////////
+// 受信データ解析
+// in  data[]: コントローラから受信したデータ
+///////////////////////////////////////////////////
+void dataProcess(uint8_t data[]){
+
+  int stick_val[4];   // アナログスティック
+  int sw1 = 0;        // コントローラ SW1
+  int sw2 = 0;        // コントローラ SW2
+  int sw3 = 0;        // コントローラ SW3
+  int sw4 = 0;        // コントローラ SW4
+  
+  // アナログスティック値の取り出し
+  stick_val[0] = ( data[0]>>3 ) & 0x1f;  // 左 X(よこ) [0～30]
+  stick_val[1] = ( data[1]>>3 ) & 0x1f;  // 左 Y(たて) [0～30]
+  stick_val[2] = ( data[2]>>3 ) & 0x1f;  // 右 X(よこ) [0～30]
+  stick_val[3] = ( data[3]>>3 ) & 0x1f;  // 右 Y(たて) [0～30]
+  
+  // スイッチ情報
+  sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]
+  sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]
+  sw3 = (data[4] >> 5) & 0x1; // コントローラ SW3 [0:OFF 1:ON]
+  sw4 = (data[4] >> 6) & 0x1; // コントローラ SW4 [0:OFF 1:ON]
+  
+  // 駆動 動作
+  drive(stick_val[0], stick_val[1], sw1); // 1_X, 1_Y, sw1
+}
+
+///////////////////////////////////////////////////
+// 駆動 動作
+// in    vx:  スティックX方向(よこ)の傾き
+//              0(左に倒した状態)～15(触れてない)～30(右に倒した状態)
+//       vy:  スティックY方向(たて)の傾き
+//              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
+//       ena: 動作許可(0:NG,1:OK) 
+///////////////////////////////////////////////////
+void drive(int vx, int vy, int emg)
 {
 	if(vx < 411){	// スティックが左に傾いていれば
 		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
