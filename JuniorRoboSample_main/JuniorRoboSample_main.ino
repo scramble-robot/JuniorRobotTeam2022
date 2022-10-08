@@ -5,13 +5,18 @@
 // 初版作成：2022.9.6
 //
 
+#include <Servo.h>
+
 // プロトタイプ宣言
 void pinInit_drive(void);			// 駆動系 ピン設定
+void pinInit_arm(void);       // アーム系 ピン設定
 void drive(int vx, int vy);		// 駆動(メカナム)動作
 
 //**********************
 // ピン定義
 //**********************
+
+// 駆動
 const int FL_IN1 = 1;			// 1番ピンに左前モータのIN1を接続
 const int FL_IN2 = 2;			// 2番ピンに左前モータのIN2を接続
 const int FL_EN  = 3;			// 3番ピンに左前モータのENAを接続
@@ -28,6 +33,27 @@ const int RR_IN1 = 12;		// 12番ピンに右後モータのIN3を接続
 const int RR_IN2 = 13;		// 13番ピンに右後モータのIN4を接続
 const int RR_EN  = 11;		// 11番ピンに右後モータのENBを接続
 
+// アーム
+const int UPDN_IN1 = 1;		// 1番ピンに上下モータのIN1を接続
+const int UPDN_IN2 = 2;		// 2番ピンに上下モータのIN2を接続
+const int UPDN_EN  = 3;		// 3番ピンに上下モータのENAを接続
+
+const int FRBK_IN1 = 4;		// 4番ピンに前後モータのIN3を接続
+const int FRBK_IN2 = 7;		// 7番ピンに前後モータのIN4を接続
+const int FRBK_EN  = 5;		// 5番ピンに前後モータのENBを接続
+
+// アームリミット
+const int LM_UP = 3;			// 3番ピンにリミットスイッチ上を接続
+const int LM_DN = 4;			// 4番ピンにリミットスイッチ下を接続
+
+const int LM_FR = 3;			// 3番ピンにリミットスイッチ前を接続
+const int LM_BK = 4;			// 4番ピンにリミットスイッチ後を接続
+
+// ハンドサーボ
+Servo servo_hand;
+const int SRV_HAND = 8;   // 8番ピンにハンド用サーボモータのPWM入力を接続
+
+// その他
 const int stick_x = A0;		// Analog 0番ピンにアナログスティックX軸を接続
 const int stick_y = A1;		// Analog 1番ピンにアナログスティックY軸を接続
 
@@ -41,6 +67,8 @@ const int SW2 = A4;				// Analog 4番ピンにスイッチ2を接続
 void setup()
 {
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
+  pinInit_arm();                // アーム系ピン初期化
+  servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
 
 	pinMode(SW1, INPUT_PULLUP);		// SW1を入力モード（プルアップあり）で使用
 	pinMode(SW2, INPUT_PULLUP);		// SW2を入力モード（プルアップあり）で使用
@@ -72,6 +100,26 @@ void pinInit_drive(void)
 	analogWrite(RR_EN, 255);		// モータ出力100％
 }
 
+/////////////////////
+// アーム系 ピン設定
+/////////////////////
+void pinInit_arm(void)
+{
+	pinMode(UPDN_IN1, OUTPUT);	    // FL_IN1を出力モードで使用
+	pinMode(UPDN_IN2, OUTPUT);	    // FL_IN2を出力モードで使用
+	pinMode(UPDN_EN, OUTPUT);		    // FL_ENを出力モードで使用
+	analogWrite(UPDN_EN, 255);	    // モータ出力100％
+
+	pinMode(FRBK_IN1, OUTPUT);		  // FR_IN1を出力モードで使用
+	pinMode(FRBK_IN2, OUTPUT);		  // FR_IN2を出力モードで使用
+	pinMode(FRBK_EN, OUTPUT);			  // FR_ENを出力モードで使用
+	analogWrite(FRBK_EN, 255);		  // モータ出力100％
+
+  pinMode(LM_UP, INPUT_PULLUP);   // リミットスイッチ上を入力モード（プルアップ）で使用
+  pinMode(LM_DN, INPUT_PULLUP);   // リミットスイッチ下を入力モード（プルアップ）で使用
+  pinMode(LM_FR, INPUT_PULLUP);   // リミットスイッチ前を入力モード（プルアップ）で使用
+  pinMode(LM_BK, INPUT_PULLUP);   // リミットスイッチ後を入力モード（プルアップ）で使用
+}
 
 //**********************
 // ループ関数
