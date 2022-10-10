@@ -88,7 +88,7 @@ void pinInit_drive(void)
 	pinMode(RL_IN1, OUTPUT);		// RL_IN1を出力モードで使用
 	pinMode(RR_IN1, OUTPUT);		// RR_IN1を出力モードで使用
   
-  analogWrite(FL_EN, 0);
+  analogWrite(FL_EN, 0);      // モータ出力は0で初期化
   analogWrite(FR_EN, 0);
   analogWrite(RL_EN, 0);
   analogWrite(RR_EN, 0);
@@ -99,11 +99,11 @@ void pinInit_drive(void)
 /////////////////////
 void pinInit_arm(void)
 {
-	pinMode(UPDN_IN1, OUTPUT);	    // FL_IN1を出力モードで使用
-  analogWrite(UPDN_EN, 0);
+	pinMode(UPDN_IN1, OUTPUT);	    // UPDN_IN1を出力モードで使用
+  analogWrite(UPDN_EN, 0);        // モータ出力は0で初期化
 
-	pinMode(FRBK_IN1, OUTPUT);		  // FR_IN1を出力モードで使用
-  analogWrite(FRBK_EN, 0);
+	pinMode(FRBK_IN1, OUTPUT);		  // FRBK_IN1を出力モードで使用
+  analogWrite(FRBK_EN, 0);        // モータ出力は0で初期化
 
   pinMode(LM_UP, INPUT_PULLUP);   // リミットスイッチ上を入力モード（プルアップ）で使用
   pinMode(LM_DN, INPUT_PULLUP);   // リミットスイッチ下を入力モード（プルアップ）で使用
