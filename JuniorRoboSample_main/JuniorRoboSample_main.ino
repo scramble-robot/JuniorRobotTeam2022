@@ -12,6 +12,8 @@ void pinInit_drive(void);                 // 駆動系 ピン設定
 void pinInit_arm(void);                   // アーム系 ピン設定
 void drive(int vx, int vy, int emg);      // 駆動(メカナム)動作
 void dataProcess(uint8_t data[]);         // 受信データ解析
+void arm_updown(int vy, int emg);         // アーム上下 動作
+void arm_frontback(int vy, int emg);      // アーム前後 動作
 
 //**********************
 // 各種設定
@@ -180,13 +182,26 @@ void dataProcess(uint8_t data[]){
   stick_val[3] = ( data[3]>>3 ) & 0x1f;  // 右 Y(たて) [0～30]
   
   // スイッチ情報
-  sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]
+  sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]：動作許可
   sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]
   sw3 = (data[4] >> 5) & 0x1; // コントローラ SW3 [0:OFF 1:ON]
-  sw4 = (data[4] >> 6) & 0x1; // コントローラ SW4 [0:OFF 1:ON]
+  sw4 = (data[4] >> 6) & 0x1; // コントローラ SW4 [0:OFF 1:ON]：駆動、アーム前後切替
   
-  // 駆動 動作
-  drive(stick_val[0], stick_val[1], sw1); // 1_X, 1_Y, sw1
+  if(sw4 == 0){
+    // 駆動 動作
+    drive(stick_val[0], stick_val[1], sw1); // 1_X, 1_Y, sw1
+    // アーム前後 停止
+    arm_frontback(0, 0);
+  }
+  else{
+    // アーム前後 動作
+    arm_frontback(stick_val[1], sw1); // 1_Y, sw1
+    // 駆動 停止
+    drive(0, 0, 0);
+  }
+
+  // アーム上下 動作
+  arm_updown(stick_val[3], sw1); // 2_Y, sw1
 }
 
 ///////////////////////////////////////////////////
@@ -269,4 +284,66 @@ void drive(int vx, int vy, int emg)
 		digitalWrite(RR_IN1, HIGH);
 		digitalWrite(RR_IN2, HIGH);
 	}
+}
+
+///////////////////////////////////////////////////
+// アーム上下 動作
+// in    vy:  スティックY方向(たて)の傾き
+//              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
+//       ena: 動作許可(0:NG,1:OK) 
+///////////////////////////////////////////////////
+void arm_updown(int vy, int emg){
+  if(emg==0){
+    // 停止
+    digitalWrite(UPDN_IN1, LOW);
+    analogWrite(UPDN_EN, 0);		// モータ出力0％
+  }
+  else{
+    if(vy > OUTVAL_HALF && digitalRead(LM_UP) == 1){
+      // 正回転(上方向)
+      digitalWrite(UPDN_IN1, LOW);
+      vy = ((vy-OUTVAL_HALF) * PWM_MAX) / OUTVAL_HALF;
+    }
+    else
+    if(vy < OUTVAL_HALF && digitalRead(LM_DN) == 1){
+      // 逆回転(下方向)
+      digitalWrite(UPDN_IN1, HIGH);
+      vy = ((OUTVAL_HALF-vy) * PWM_MAX) / OUTVAL_HALF;
+    }
+    else{
+      vy = 0;
+    }
+    analogWrite(UPDN_EN, vy);
+  }
+}
+
+///////////////////////////////////////////////////
+// アーム前後 動作
+// in    vy:  スティックY方向(たて)の傾き
+//              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
+//       ena: 動作許可(0:NG,1:OK) 
+///////////////////////////////////////////////////
+void arm_frontback(int vy, int emg){
+  if(emg==0){
+    // 停止
+    digitalWrite(FRBK_IN1, LOW);
+    analogWrite(FRBK_EN, 0);		// モータ出力0％
+  }
+  else{
+    if(vy > OUTVAL_HALF && digitalRead(LM_FR) == 1){
+      // 正回転(前方向)
+      digitalWrite(FRBK_IN1, LOW);
+      vy = ((vy-OUTVAL_HALF) * PWM_MAX) / OUTVAL_HALF;
+    }
+    else
+    if(vy < OUTVAL_HALF && digitalRead(LM_BK) == 1){
+      // 逆回転(後方向)
+      digitalWrite(FRBK_IN1, HIGH);
+      vy = ((OUTVAL_HALF-vy) * PWM_MAX) / OUTVAL_HALF;
+    }
+    else{
+      vy = 0;
+    }
+    analogWrite(FRBK_EN, vy);
+  }
 }
