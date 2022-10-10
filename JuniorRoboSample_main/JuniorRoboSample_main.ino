@@ -24,7 +24,7 @@ void arm_frontback(int vy, int emg);      // アーム前後 動作
 #define   OUTVAL_HALF     (OUTVAL_MAX/2)	// 停止時のアナログスティック値
 #define   PWM_MAX         255				      // 最大出力
 
-#define   TRANSDATANUM    8               // コントローラから1度に届くデータ個数
+#define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
 
 //**********************
 // ピン定義
@@ -80,7 +80,7 @@ const int SW2 = A4;				// Analog 4番ピンにスイッチ2を接続
 //**********************
 void setup()
 {
-	Serial.begin(TRANS_BITRATE);
+	Serial2.begin(TRANS_BITRATE);
 
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
   pinInit_arm();                // アーム系ピン初期化
@@ -142,11 +142,11 @@ void pinInit_arm(void)
 //**********************
 void loop(){
   // コントローラからデータを受信
-  int serialCount = Serial.available();
+  int serialCount = Serial2.available();
   for(int i=0; i<serialCount; i++){
     static int count = 0;
     static uint8_t rxData[TRANSDATANUM];
-    int data = Serial.read();
+    int data = Serial2.read();
     if((data&0x07)!=count){
       count = 0;
       continue;
