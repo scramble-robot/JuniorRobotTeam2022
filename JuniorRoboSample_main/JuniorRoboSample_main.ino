@@ -31,17 +31,17 @@ void arm_frontback(int vy, int emg);      // アーム前後 動作
 //**********************
 
 // 駆動
-const int FL_IN1 = 4;       //  4番ピンに左前モータのDIRを接続
-const int FL_EN  = 3;       //  3番ピンに左前モータのPWMを接続
+const int FL_DIR = 4;     // 4番ピンに左前モータのDIRを接続
+const int FL_PWM = 3;     // 3番ピンに左前モータのPWMを接続
 
-const int FR_IN1 = 11;      // 11番ピンに右前モータのDIRを接続
-const int FR_EN  = 12;      // 12番ピンに右前モータのPWMを接続
+const int FR_DIR = 11;    // 11番ピンに右前モータのDIRを接続
+const int FR_PWM = 12;    // 12番ピンに右前モータのPWMを接続
 
-const int RL_IN1 = 1;       //  1番ピンに左後モータのDIRを接続
-const int RL_EN  = 2;       //  2番ピンに左後モータのPWMを接続
+const int RL_DIR = 1;     // 1番ピンに左後モータのDIRを接続
+const int RL_PWM = 2;     // 2番ピンに左後モータのPWMを接続
 
-const int RR_IN1 = 8;       //  8番ピンに右後モータのDIRを接続
-const int RR_EN  = 7;       //  7番ピンに右後モータのPWMを接続
+const int RR_DIR = 8;     // 8番ピンに右後モータのDIRを接続
+const int RR_PWM = 7;     // 7番ピンに右後モータのPWMを接続
 
 // アーム
 const int UPDN_IN1 = 5;     //  5番ピンに上下モータのDIRを接続
@@ -70,6 +70,7 @@ const int TRANS_LED = A8;   // アナログ8番ピンに通信成功LEDを接続
 //**********************
 void setup()
 {
+  Serial.begin(TRANS_BITRATE);
 	Serial2.begin(TRANS_BITRATE);
 
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
@@ -83,15 +84,17 @@ void setup()
 /////////////////////
 void pinInit_drive(void)
 {
-	pinMode(FL_IN1, OUTPUT);		// FL_IN1を出力モードで使用
-	pinMode(FR_IN1, OUTPUT);		// FR_IN1を出力モードで使用
-	pinMode(RL_IN1, OUTPUT);		// RL_IN1を出力モードで使用
-	pinMode(RR_IN1, OUTPUT);		// RR_IN1を出力モードで使用
-  
-  analogWrite(FL_EN, 0);      // モータ出力は0で初期化
-  analogWrite(FR_EN, 0);
-  analogWrite(RL_EN, 0);
-  analogWrite(RR_EN, 0);
+  pinMode(FL_DIR, OUTPUT);    // FL_DIRを出力モードで使用
+  analogWrite(FL_PWM, 64);    // モータ出力25％
+
+  pinMode(FR_DIR, OUTPUT);    // FR_DIRを出力モードで使用
+  analogWrite(FR_PWM, 64);    // モータ出力25％
+
+  pinMode(RL_DIR, OUTPUT);    // RL_DIRを出力モードで使用
+  analogWrite(RL_PWM, 64);    // モータ出力25％
+
+  pinMode(RR_DIR, OUTPUT);    // RR_DIRを出力モードで使用
+  analogWrite(RR_PWM, 64);    // モータ出力25％
 }
 
 /////////////////////
@@ -186,66 +189,171 @@ void dataProcess(uint8_t data[]){
 //              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
 //       ena: 動作許可(0:NG,1:OK) 
 ///////////////////////////////////////////////////
+
+// 右前モータの速度算出
+void FL_motor(int stopFlag, int inverse, int power) {
+  if (!stopFlag) {
+    if (inverse) {
+      digitalWrite(FL_DIR, HIGH);
+    }
+    else {
+      digitalWrite(FL_DIR, LOW);
+    }
+    analogWrite(FL_PWM, power);
+  }
+  else {
+    digitalWrite(FL_DIR, LOW);
+    analogWrite(FL_PWM, 0);
+  }
+}
+
+// 左前モータの速度算出
+void FR_motor(int stopFlag, int inverse, int power) {
+  if (!stopFlag) {
+    if (inverse) {
+      digitalWrite(FR_DIR, HIGH);
+    }
+    else {
+      digitalWrite(FR_DIR, LOW);
+    }
+    analogWrite(FR_PWM, power);
+  }
+  else {
+    digitalWrite(FR_DIR, LOW);
+    analogWrite(FR_PWM, 0);
+  }
+}
+
+// 右後モータの速度算出
+void RL_motor(int stopFlag, int inverse, int power) {
+  if (!stopFlag) {
+    if (inverse) {
+      digitalWrite(RL_DIR, HIGH);
+    }
+    else {
+      digitalWrite(RL_DIR, LOW);
+    }
+    analogWrite(RL_PWM, power);
+  }
+  else {
+    digitalWrite(RL_DIR, LOW);
+    analogWrite(RL_PWM, 0);
+  }
+}
+
+// 左後モータの速度算出
+void RR_motor(int stopFlag, int inverse, int power) {
+  if (!stopFlag) {
+    if (inverse) {
+      digitalWrite(RR_DIR, HIGH);
+    }
+    else {
+      digitalWrite(RR_DIR, LOW);
+      Serial.println("LOW");
+    }
+    analogWrite(RR_PWM, power);
+  }
+  else {
+    digitalWrite(RR_DIR, LOW);
+    analogWrite(RR_PWM, 0);
+  }
+}
+
 void drive(int vx, int vy, int emg)
 {
-	if(vx < OUTVAL_HALF){	// スティックが左に傾いていれば
-		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
-		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
-    analogWrite(FL_EN, 255);
-    analogWrite(FR_EN, 255);
-    analogWrite(RL_EN, 255);
-    analogWrite(RR_EN, 255);
-    
-	}else
-	if(vx > OUTVAL_HALF){	// スティックが右に傾いていれば
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
-		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
-		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
-    analogWrite(FL_EN, 255);
-    analogWrite(FR_EN, 255);
-    analogWrite(RL_EN, 255);
-    analogWrite(RR_EN, 255);
-	}else
-	if(vy < OUTVAL_HALF){	// スティックが上に傾いていれば
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
-		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
-		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
-    analogWrite(FL_EN, 255);
-    analogWrite(FR_EN, 255);
-    analogWrite(RL_EN, 255);
-    analogWrite(RR_EN, 255);
-	}else
-	if(vy > OUTVAL_HALF){	// スティックが下に傾いていれば
-		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
-		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
-    analogWrite(FL_EN, 255);
-    analogWrite(FR_EN, 255);
-    analogWrite(RL_EN, 255);
-    analogWrite(RR_EN, 255);
-//	}else
-//	if(digitalRead(SW1)==0){	// SW1が押されたら
-//		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
-//		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
-//		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
-//		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
-//	}else
-//	if(digitalRead(SW2)==0){	// SW2が押されたら
-//		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
-//		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
-//		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
-//		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
-	}
-	else{   // スティックが傾いていない　かつ　ボタンが押されていなければ全てのモータをブレーキ
-		analogWrite(FL_EN, 0);
-		analogWrite(FR_EN, 0);
-		analogWrite(RL_EN, 0);
-		analogWrite(RR_EN, 0);
+  vy = vy * -1;
+  int dis = sqrt(vx * vx + vy * vy) ;
+  Serial.println(dis);
+  int deg = degrees(atan2(vy, vx));
+  double p = (double)dis / 8;
+  Serial.println(p);
+  int power = (int)(255 * p);
+  power = min(power, 255);
+  Serial.println(power);
+
+//  if (sw1Flag != 0 && emg != 0) {
+//    FL_motor(0, 1, power);
+//    FR_motor(0, 0, power);
+//    RL_motor(0, 1, power);
+//    RR_motor(0, 0, power);
+//    Serial.println("turnLeft");
+//  }
+//  else if (sw2Flag != 0 && emg != 0) {
+//    FL_motor(0, 0, power);
+//    FR_motor(0, 1, power);
+//    RL_motor(0, 0, power);
+//    RR_motor(0, 1, power);
+//    Serial.println("turnRight");
+//  }
+
+  if (vx == 0 && vy == 0 || emg == 0) {
+    FL_motor(1, 0, 0);
+    FR_motor(1, 0, 0);
+    RL_motor(1, 0, 0);
+    RR_motor(1, 0, 0);
+    Serial.println("stop");
+  }
+
+  else if (-22 <= deg && deg < 23) {
+    FL_motor(0, 0, power);
+    FR_motor(0, 1, power);
+    RL_motor(0, 1, power);
+    RR_motor(0, 0, power);
+    Serial.println("right");
+  }
+
+  else if (-23 <= deg && deg < 68) {
+    FL_motor(0, 0, power);
+    FR_motor(1, 0, power);
+    RL_motor(1, 0, power);
+    RR_motor(0, 0, power);
+    Serial.println("rightForward");
+  }
+  else if (68 <= deg && deg < 113) {
+    FL_motor(0, 0, power);
+    FR_motor(0, 0, power);
+    RL_motor(0, 0, power);
+    RR_motor(0, 0, power);
+    Serial.println("forward");
+  }
+  else if (113 <= deg && deg < 158) {
+    FL_motor(1, 0, power);
+    FR_motor(0, 0, power);
+    RL_motor(0, 0, power);
+    RR_motor(1, 0, power);
+    Serial.println("leftForward");
+  }
+
+  else if (158 <= deg && deg <= 180 || -180 <= deg && deg < -157) {
+    FL_motor(0, 1, power);
+    FR_motor(0, 0, power);
+    RL_motor(0, 0, power);
+    RR_motor(0, 1, power);
+    Serial.println("left");
+  }
+
+  else if (-157 <= deg && deg < -112) {
+    FL_motor(0, 1, power);
+    FR_motor(1, 0, power);
+    RL_motor(1, 0, power);
+    RR_motor(0, 1, power);
+    Serial.println("leftBack");
+  }
+
+  else if (-112 <= deg && deg < -67) {
+    FL_motor(0, 1, power);
+    FR_motor(0, 1, power);
+    RL_motor(0, 1, power);
+    RR_motor(0, 1, power);
+    Serial.println("back");
+  }
+
+  else if (-67 <= deg && deg < -22) {
+    FL_motor(1, 0, power);
+    FR_motor(0, 1, power);
+    RL_motor(0, 1, power);
+    RR_motor(1, 0, power);
+    Serial.println("rightBack");
 	}
 }
 
