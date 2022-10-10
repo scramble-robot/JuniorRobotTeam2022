@@ -85,16 +85,16 @@ void setup()
 void pinInit_drive(void)
 {
   pinMode(FL_DIR, OUTPUT);    // FL_DIRを出力モードで使用
-  analogWrite(FL_PWM, 64);    // モータ出力25％
+  analogWrite(FL_PWM, 0);     // モータ出力初期化
 
   pinMode(FR_DIR, OUTPUT);    // FR_DIRを出力モードで使用
-  analogWrite(FR_PWM, 64);    // モータ出力25％
+  analogWrite(FR_PWM, 0);     // モータ出力初期化
 
   pinMode(RL_DIR, OUTPUT);    // RL_DIRを出力モードで使用
-  analogWrite(RL_PWM, 64);    // モータ出力25％
+  analogWrite(RL_PWM, 0);     // モータ出力初期化
 
   pinMode(RR_DIR, OUTPUT);    // RR_DIRを出力モードで使用
-  analogWrite(RR_PWM, 64);    // モータ出力25％
+  analogWrite(RR_PWM, 0);     // モータ出力初期化
 }
 
 /////////////////////
@@ -102,10 +102,10 @@ void pinInit_drive(void)
 /////////////////////
 void pinInit_arm(void)
 {
-	pinMode(UPDN_IN1, OUTPUT);	    // UPDN_IN1を出力モードで使用
+  pinMode(UPDN_IN1, OUTPUT);      // UPDN_IN1を出力モードで使用
   analogWrite(UPDN_EN, 0);        // モータ出力は0で初期化
 
-	pinMode(FRBK_IN1, OUTPUT);		  // FRBK_IN1を出力モードで使用
+  pinMode(FRBK_IN1, OUTPUT);	  // FRBK_IN1を出力モードで使用
   analogWrite(FRBK_EN, 0);        // モータ出力は0で初期化
 
   pinMode(LM_UP, INPUT_PULLUP);   // リミットスイッチ上を入力モード（プルアップ）で使用
@@ -158,6 +158,9 @@ void dataProcess(uint8_t data[]){
   stick_val[2] = ( data[2]>>3 ) & 0x1f;  // 右 X(よこ) [0～30]
   stick_val[3] = ( data[3]>>3 ) & 0x1f;  // 右 Y(たて) [0～30]
   
+  stick_val[0] = stick_val[0] / 2;  // 左 X(よこ) [0～15]
+  stick_val[1] = stick_val[1] / 2;  // 左 Y(たて) [0～15]
+  
   // スイッチ情報
   sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]：動作許可
   sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]
@@ -166,7 +169,7 @@ void dataProcess(uint8_t data[]){
   
   if(sw4 == 0){
     // 駆動 動作
-    drive(stick_val[0], stick_val[1], sw1); // 1_X, 1_Y, sw1
+    drive(stick_val[0]-7, stick_val[1]-7, sw1); // 1_X, 1_Y, sw1
     // アーム前後 停止
     arm_frontback(0, 0);
   }
@@ -211,10 +214,10 @@ void FL_motor(int stopFlag, int inverse, int power) {
 void FR_motor(int stopFlag, int inverse, int power) {
   if (!stopFlag) {
     if (inverse) {
-      digitalWrite(FR_DIR, HIGH);
+      digitalWrite(FR_DIR, LOW);
     }
     else {
-      digitalWrite(FR_DIR, LOW);
+      digitalWrite(FR_DIR, HIGH);
     }
     analogWrite(FR_PWM, power);
   }
@@ -245,10 +248,10 @@ void RL_motor(int stopFlag, int inverse, int power) {
 void RR_motor(int stopFlag, int inverse, int power) {
   if (!stopFlag) {
     if (inverse) {
-      digitalWrite(RR_DIR, HIGH);
+      digitalWrite(RR_DIR, LOW);
     }
     else {
-      digitalWrite(RR_DIR, LOW);
+      digitalWrite(RR_DIR, HIGH);
       Serial.println("LOW");
     }
     analogWrite(RR_PWM, power);
