@@ -19,7 +19,7 @@ void dataProcess(uint8_t data[]);   // 受信データ解析
 #define   OUTVAL_HALF     (OUTVAL_MAX/2)	// 停止時のアナログスティック値
 #define   PWM_MAX         255				      // 最大出力
 
-#define   TRANSDATANUM    8               // コントローラから1度に届くデータ個数
+#define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
 
 //**********************
 // ピン定義
