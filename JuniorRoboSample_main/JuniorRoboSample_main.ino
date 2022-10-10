@@ -3,7 +3,7 @@
 // ジュニアロボットチーム用サンプルロボット　メインプログラム
 //
 // 初版作成：2022.9.6
-//
+// 少しデバッグ：2022.10.9
 
 #include <Servo.h>
 
@@ -31,51 +31,45 @@ void hand_openclose(int sw);              // ハンド開閉 動作
 #define   DISCONNECT_CNT  20              // 通信断と判断する回数
 
 #define   HAND_OPEN       35              // ハンド あけたときのPWM値
-#define   HAND_CLOSE      98              // ハンド 閉じたときのPWM値
+#define   HAND_CLOSE      98              // ハンド 閉めたときのPWM値
 
 //**********************
 // ピン定義
 //**********************
 
 // 駆動
-const int FL_IN1 = 4;			// 1番ピンに左前モータのIN1を接続
-const int FL_EN  = 3;			// 3番ピンに左前モータのENAを接続
+const int FL_IN1 = 4;			// 4番ピンに左前モータのDIRを接続
+const int FL_EN  = 3;			// 3番ピンに左前モータのPWMを接続
 
-const int FR_IN1 = 11;			// 4番ピンに右前モータのIN3を接続
-const int FR_EN  = 12;			// 5番ピンに右前モータのENBを接続
+const int FR_IN1 = 11;		// 11番ピンに右前モータのDIRを接続
+const int FR_EN  = 12;		// 12番ピンに右前モータのPWMを接続
 
-const int RL_IN1 = 1;			// 8番ピンに左後モータのIN1を接続
-const int RL_EN  = 2;		// 10番ピンに左後モータのENAを接続
+const int RL_IN1 = 1;			// 1番ピンに左後モータのDIRを接続
+const int RL_EN  = 2;		  // 2番ピンに左後モータのPWMを接続
 
-const int RR_IN1 = 8;		// 12番ピンに右後モータのIN3を接続
-const int RR_EN  = 7;		// 11番ピンに右後モータのENBを接続
+const int RR_IN1 = 8;     // 8番ピンに右後モータのDIRを接続
+const int RR_EN  = 7;     // 7番ピンに右後モータのPWMを接続
 
 // アーム
-const int UPDN_IN1 = 5;		// 1番ピンに上下モータのIN1を接続
-const int UPDN_EN  = 6;		// 3番ピンに上下モータのENAを接続
+const int UPDN_IN1 = 5;		// 5番ピンに上下モータのDIRを接続
+const int UPDN_EN  = 6;		// 6番ピンに上下モータのPWMを接続
 
-const int FRBK_IN1 = 9;		// 4番ピンに前後モータのIN3を接続
-const int FRBK_EN  = 10;		// 5番ピンに前後モータのENBを接続
+const int FRBK_IN1 = 9;		// 9番ピンに前後モータのDIRを接続
+const int FRBK_EN  = 10;  // 10番ピンに前後モータのPWMを接続
 
 // アームリミット
-const int LM_UP = 48;			// 3番ピンにリミットスイッチ上を接続
-const int LM_DN = 42;			// 4番ピンにリミットスイッチ下を接続
+const int LM_UP = 48;			// 48番ピンにリミットスイッチ上を接続
+const int LM_DN = 42;			// 42番ピンにリミットスイッチ下を接続
 
-const int LM_FR = 36;			// 3番ピンにリミットスイッチ前を接続
-const int LM_BK = 30;			// 4番ピンにリミットスイッチ後を接続
+const int LM_FR = 36;			// 36番ピンにリミットスイッチ前を接続
+const int LM_BK = 30;			// 30番ピンにリミットスイッチ後を接続
 
 // ハンドサーボ
 Servo servo_hand;
-const int SRV_HAND = 13;   // 8番ピンにハンド用サーボモータのPWM入力を接続
+const int SRV_HAND = 13;   // 13番ピンにハンド用サーボモータのPWM入力を接続
 
 // その他
-const int stick_x = A0;		// Analog 0番ピンにアナログスティックX軸を接続
-const int stick_y = A1;		// Analog 1番ピンにアナログスティックY軸を接続
-
-const int SW1 = A3;				// Analog 3番ピンにスイッチ1を接続
-const int SW2 = A4;				// Analog 4番ピンにスイッチ2を接続
-
-const int TRANS_LED = A8;
+const int TRANS_LED = A8;   // アナログ8番ピンに通信成功LEDを接続
 
 int nodata_cnt;
 
@@ -89,12 +83,10 @@ void setup()
 
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
   pinInit_arm();                // アーム系ピン初期化
-  servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
-  hand_openclose(0);            // ハンド オープン
+//  servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
+//  hand_openclose(0);            // ハンド オープン
 
-//	pinMode(SW1, INPUT_PULLUP);		// SW1を入力モード（プルアップあり）で使用
-//	pinMode(SW2, INPUT_PULLUP);		// SW2を入力モード（プルアップあり）で使用
-  pinMode(TRANS_LED, OUTPUT);
+  pinMode(TRANS_LED, OUTPUT);   // 通信成功LED 設定
   digitalWrite(TRANS_LED, LOW);
 
   nodata_cnt = 0;
@@ -106,11 +98,8 @@ void setup()
 void pinInit_drive(void)
 {
 	pinMode(FL_IN1, OUTPUT);		// FL_IN1を出力モードで使用
-
 	pinMode(FR_IN1, OUTPUT);		// FR_IN1を出力モードで使用
-
 	pinMode(RL_IN1, OUTPUT);		// RL_IN1を出力モードで使用
-
 	pinMode(RR_IN1, OUTPUT);		// RR_IN1を出力モードで使用
   
   analogWrite(FL_EN, 0);
@@ -142,42 +131,36 @@ void pinInit_arm(void)
 void loop(){
   // コントローラからデータを受信
   int serialCount = Serial2.available();
-//  if(serialCount==0){ // 受信データなし
-//    nodata_cnt++;
-//  }
-//  else{
-    for(int i=0; i<serialCount; i++){
-      static int count = 0;
-      static uint8_t rxData[TRANSDATANUM];
-      int data = Serial2.read();
-      if((data&0x07)!=count){ // 受信データの順番不一致
+  for(int i=0; i<serialCount; i++){
+    static int count = 0;
+    static uint8_t rxData[TRANSDATANUM];
+    int data = Serial2.read();
+    if((data&0x07)!=count){ // 受信データの順番不一致
+      count = 0;
+      nodata_cnt++;
+      Serial.println("xxx");
+      continue;
+    }
+    else{
+      rxData[count] = data;
+      count++;
+      digitalWrite(TRANS_LED, HIGH);
+      if(count == TRANSDATANUM){
         count = 0;
-        nodata_cnt++;
-        Serial.println("xxx");
-        continue;
-      }
-      else{
-        rxData[count] = data;
-        count++;
-        digitalWrite(TRANS_LED, HIGH);
-        if(count == TRANSDATANUM){
-          count = 0;
-          // 受信データ解析
-          dataProcess(rxData);
-          nodata_cnt = 0;
-          Serial.print("x2:");
-          Serial.print((rxData[2]>>3 ) & 0x1f);
-          Serial.print("y2:");
-          Serial.println((rxData[3]>>3 ) & 0x1f);
-        }
+        // 受信データ解析
+        dataProcess(rxData);
+        nodata_cnt = 0;
+        
+        Serial.print("x1:");
+        Serial.print((rxData[0]>>3 ) & 0x1f);
+        Serial.print("y1:");
+        Serial.print((rxData[1]>>3 ) & 0x1f);        
+        Serial.print("x2:");
+        Serial.print((rxData[2]>>3 ) & 0x1f);
+        Serial.print("y2:");
+        Serial.println((rxData[3]>>3 ) & 0x1f);
       }
     }
-//  }
-
-  if(nodata_cnt >= DISCONNECT_CNT){
-//    all_stop();       // 全停止
-    nodata_cnt = DISCONNECT_CNT;
-    digitalWrite(TRANS_LED, LOW);
   }
   
 }
@@ -206,7 +189,7 @@ void dataProcess(uint8_t data[]){
   sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]：右旋回
   sw3 = (data[4] >> 5) & 0x1; // コントローラ SW3 [0:OFF 1:ON]：左旋回
   sw4 = (data[4] >> 6) & 0x1; // コントローラ SW4 [0:OFF 1:ON]：駆動、アーム前後切替
-  sw5 = (data[4] >> 7) & 0x1; // コントローラ SW4 [0:OFF 1:ON]：ハンド開閉
+  sw5 = (data[4] >> 7) & 0x1; // コントローラ SW5 [0:OFF 1:ON]：ハンド開閉
   
   if(sw4 == 0){
     // 駆動 動作
@@ -222,10 +205,10 @@ void dataProcess(uint8_t data[]){
   }
 
   // アーム上下 動作
-  arm_updown(stick_val[1], sw1); // 2_Y, sw1
+  arm_updown(stick_val[3], sw1); // 2_Y, sw1
 
   // ハンド開閉
-  hand_openclose(sw4);
+  hand_openclose(sw5);
   
 }
 
@@ -249,10 +232,10 @@ void all_stop(void){
 void drive(int vx, int vy, int emg)
 {
 	if(vx < OUTVAL_HALF){	// スティックが左に傾いていれば
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを正回転
-		digitalWrite(RL_IN1, LOW);	// 左後モータを逆回転
-		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
+		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
+		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
+		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
+		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
     analogWrite(FL_EN, 255);
     analogWrite(FR_EN, 255);
     analogWrite(RL_EN, 255);
@@ -260,30 +243,30 @@ void drive(int vx, int vy, int emg)
     
 	}else
 	if(vx > OUTVAL_HALF){	// スティックが右に傾いていれば
-		digitalWrite(FL_IN1, LOW);	// 左前モータを逆回転
-		digitalWrite(FR_IN1, LOW);	// 右前モータを逆回転
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを正回転
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを正回転
+		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
+		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
+		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
+		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
     analogWrite(FL_EN, 255);
     analogWrite(FR_EN, 255);
     analogWrite(RL_EN, 255);
     analogWrite(RR_EN, 255);
 	}else
 	if(vy < OUTVAL_HALF){	// スティックが上に傾いていれば
-		digitalWrite(FL_IN1, LOW);	// 左前モータを逆回転
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを正回転
-		digitalWrite(RL_IN1, LOW);	// 左後モータを逆回転
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを正回転
+		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
+		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
+		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
+		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
     analogWrite(FL_EN, 255);
     analogWrite(FR_EN, 255);
     analogWrite(RL_EN, 255);
     analogWrite(RR_EN, 255);
 	}else
 	if(vy > OUTVAL_HALF){	// スティックが下に傾いていれば
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
-		digitalWrite(FR_IN1, LOW);	// 右前モータを逆回転
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを正回転
-		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
+		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
+		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
+		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
+		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
     analogWrite(FL_EN, 255);
     analogWrite(FR_EN, 255);
     analogWrite(RL_EN, 255);
@@ -326,14 +309,12 @@ void arm_updown(int vy, int emg){
       // 正回転(上方向)
       digitalWrite(UPDN_IN1, LOW);
       vy = ((vy-OUTVAL_HALF) * PWM_MAX) / OUTVAL_HALF;
-      Serial.println("aaaaaaa");
     }
     else
     if(vy < OUTVAL_HALF && digitalRead(LM_DN) == 1){
       // 逆回転(下方向)
       digitalWrite(UPDN_IN1, HIGH);
       vy = ((OUTVAL_HALF-vy) * PWM_MAX) / OUTVAL_HALF;
-      Serial.println("bbbbbbbbb");
     }
     else{
       vy = 0;
@@ -378,9 +359,9 @@ void arm_frontback(int vy, int emg){
 // in    sw [0:OFF(OPEN) 1:ON(CLOSE)]
 ///////////////////////////////////////////////////
 void hand_openclose(int sw){
-  if(sw==1){ // ON
-    servo_hand.write(HAND_OPEN);
-  }else{
-    servo_hand.write(HAND_CLOSE);
-  }
+//  if(sw==1){ // ON
+//    servo_hand.write(HAND_OPEN);
+//  }else{
+//    servo_hand.write(HAND_CLOSE);
+//  }
 }
