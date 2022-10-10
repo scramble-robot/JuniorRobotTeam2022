@@ -52,7 +52,7 @@ const int SW2 = A4;				// Analog 0番ピンにアナログスティックを接�
 //**********************
 void setup()
 {
-	Serial.begin(TRANS_BITRATE);
+	Serial2.begin(TRANS_BITRATE);
 
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
 
@@ -92,11 +92,11 @@ void pinInit_drive(void)
 //**********************
 void loop(){
   // コントローラからデータを受信
-  int serialCount = Serial.available();
+  int serialCount = Serial2.available();
   for(int i=0; i<serialCount; i++){
     static int count = 0;
     static uint8_t rxData[TRANSDATANUM];
-    int data = Serial.read();
+    int data = Serial2.read();
     if((data&0x07)!=count){
       count = 0;
       continue;
