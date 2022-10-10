@@ -96,24 +96,14 @@ void setup()
 void pinInit_drive(void)
 {
 	pinMode(FL_IN1, OUTPUT);		// FL_IN1を出力モードで使用
-	pinMode(FL_IN2, OUTPUT);		// FL_IN2を出力モードで使用
-	pinMode(FL_EN, OUTPUT);			// FL_ENを出力モードで使用
-	analogWrite(FL_EN, 255);		// モータ出力100％
-
 	pinMode(FR_IN1, OUTPUT);		// FR_IN1を出力モードで使用
-	pinMode(FR_IN2, OUTPUT);		// FR_IN2を出力モードで使用
-	pinMode(FR_EN, OUTPUT);			// FR_ENを出力モードで使用
-	analogWrite(FR_EN, 255);		// モータ出力100％
-
 	pinMode(RL_IN1, OUTPUT);		// RL_IN1を出力モードで使用
-	pinMode(RL_IN2, OUTPUT);		// RL_IN2を出力モードで使用
-	pinMode(RL_EN, OUTPUT);			// RL_ENを出力モードで使用
-	analogWrite(RL_EN, 255);		// モータ出力100％
-
 	pinMode(RR_IN1, OUTPUT);		// RR_IN1を出力モードで使用
-	pinMode(RR_IN2, OUTPUT);		// RR_IN2を出力モードで使用
-	pinMode(RR_EN, OUTPUT);			// RR_ENを出力モードで使用
-	analogWrite(RR_EN, 255);		// モータ出力100％
+  
+  analogWrite(FL_EN, 0);
+  analogWrite(FR_EN, 0);
+  analogWrite(RL_EN, 0);
+  analogWrite(RR_EN, 0);
 }
 
 /////////////////////
@@ -122,14 +112,10 @@ void pinInit_drive(void)
 void pinInit_arm(void)
 {
 	pinMode(UPDN_IN1, OUTPUT);	    // FL_IN1を出力モードで使用
-	pinMode(UPDN_IN2, OUTPUT);	    // FL_IN2を出力モードで使用
-	pinMode(UPDN_EN, OUTPUT);		    // FL_ENを出力モードで使用
-	analogWrite(UPDN_EN, 255);	    // モータ出力100％
+  analogWrite(UPDN_EN, 0);
 
 	pinMode(FRBK_IN1, OUTPUT);		  // FR_IN1を出力モードで使用
-	pinMode(FRBK_IN2, OUTPUT);		  // FR_IN2を出力モードで使用
-	pinMode(FRBK_EN, OUTPUT);			  // FR_ENを出力モードで使用
-	analogWrite(FRBK_EN, 255);		  // モータ出力100％
+  analogWrite(FRBK_EN, 0);
 
   pinMode(LM_UP, INPUT_PULLUP);   // リミットスイッチ上を入力モード（プルアップ）で使用
   pinMode(LM_DN, INPUT_PULLUP);   // リミットスイッチ下を入力モード（プルアップ）で使用
@@ -214,75 +200,64 @@ void dataProcess(uint8_t data[]){
 ///////////////////////////////////////////////////
 void drive(int vx, int vy, int emg)
 {
-	if(vx < 411){	// スティックが左に傾いていれば
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
-		digitalWrite(FL_IN2, LOW);
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを正回転
-		digitalWrite(FR_IN2, LOW);
-		digitalWrite(RL_IN1, LOW);	// 左後モータを逆回転
-		digitalWrite(RL_IN2, HIGH);
-		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
-		digitalWrite(RR_IN2, HIGH);
+	if(vx < OUTVAL_HALF){	// スティックが左に傾いていれば
+		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
+		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
+		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
+		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
+    analogWrite(FL_EN, 255);
+    analogWrite(FR_EN, 255);
+    analogWrite(RL_EN, 255);
+    analogWrite(RR_EN, 255);
+    
 	}else
-	if(vx > 611){	// スティックが右に傾いていれば
-		digitalWrite(FL_IN1, LOW);	// 左前モータを逆回転
-		digitalWrite(FL_IN2, HIGH);
-		digitalWrite(FR_IN1, LOW);	// 右前モータを逆回転
-		digitalWrite(FR_IN2, HIGH);
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを正回転
-		digitalWrite(RL_IN2, LOW);
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを正回転
-		digitalWrite(RR_IN2, LOW);
+	if(vx > OUTVAL_HALF){	// スティックが右に傾いていれば
+		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
+		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
+		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
+		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
+    analogWrite(FL_EN, 255);
+    analogWrite(FR_EN, 255);
+    analogWrite(RL_EN, 255);
+    analogWrite(RR_EN, 255);
 	}else
-	if(vy < 411){	// スティックが上に傾いていれば
-		digitalWrite(FL_IN1, LOW);	// 左前モータを逆回転
-		digitalWrite(FL_IN2, HIGH);
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを正回転
-		digitalWrite(FR_IN2, LOW);
-		digitalWrite(RL_IN1, LOW);	// 左後モータを逆回転
-		digitalWrite(RL_IN2, HIGH);
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを正回転
-		digitalWrite(RR_IN2, LOW);
+	if(vy < OUTVAL_HALF){	// スティックが上に傾いていれば
+		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
+		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
+		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
+		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
+    analogWrite(FL_EN, 255);
+    analogWrite(FR_EN, 255);
+    analogWrite(RL_EN, 255);
+    analogWrite(RR_EN, 255);
 	}else
-	if(vy > 611){	// スティックが下に傾いていれば
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
-		digitalWrite(FL_IN2, LOW);
-		digitalWrite(FR_IN1, LOW);	// 右前モータを逆回転
-		digitalWrite(FR_IN2, HIGH);
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを正回転
-		digitalWrite(RL_IN2, LOW);
-		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
-		digitalWrite(RR_IN2, HIGH);
-	}else
-	if(digitalRead(SW1)==0){	// SW1が押されたら
-		digitalWrite(FL_IN1, LOW);	// 左前モータを逆回転
-		digitalWrite(FL_IN2, HIGH);
-		digitalWrite(FR_IN1, LOW);	// 右前モータを逆回転
-		digitalWrite(FR_IN2, HIGH);
-		digitalWrite(RL_IN1, LOW);	// 左後モータを逆回転
-		digitalWrite(RL_IN2, HIGH);
-		digitalWrite(RR_IN1, LOW);	// 右後モータを逆回転
-		digitalWrite(RR_IN2, HIGH);
-	}else
-	if(digitalRead(SW2)==0){	// SW2が押されたら
-		digitalWrite(FL_IN1, HIGH);	// 左前モータを正回転
-		digitalWrite(FL_IN2, LOW);
-		digitalWrite(FR_IN1, HIGH);	// 右前モータを正回転
-		digitalWrite(FR_IN2, LOW);
-		digitalWrite(RL_IN1, HIGH);	// 左後モータを正回転
-		digitalWrite(RL_IN2, LOW);
-		digitalWrite(RR_IN1, HIGH);	// 右後モータを正回転
-		digitalWrite(RR_IN2, LOW);    
+	if(vy > OUTVAL_HALF){	// スティックが下に傾いていれば
+		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
+		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
+		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
+		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
+    analogWrite(FL_EN, 255);
+    analogWrite(FR_EN, 255);
+    analogWrite(RL_EN, 255);
+    analogWrite(RR_EN, 255);
+//	}else
+//	if(digitalRead(SW1)==0){	// SW1が押されたら
+//		digitalWrite(FL_IN1, HIGH);	// 左前モータを逆回転
+//		digitalWrite(FR_IN1, HIGH);	// 右前モータを逆回転
+//		digitalWrite(RL_IN1, HIGH);	// 左後モータを逆回転
+//		digitalWrite(RR_IN1, HIGH);	// 右後モータを逆回転
+//	}else
+//	if(digitalRead(SW2)==0){	// SW2が押されたら
+//		digitalWrite(FL_IN1, LOW);	// 左前モータを正回転
+//		digitalWrite(FR_IN1, LOW);	// 右前モータを正回転
+//		digitalWrite(RL_IN1, LOW);	// 左後モータを正回転
+//		digitalWrite(RR_IN1, LOW);	// 右後モータを正回転
 	}
 	else{   // スティックが傾いていない　かつ　ボタンが押されていなければ全てのモータをブレーキ
-		digitalWrite(FL_IN1, HIGH);
-		digitalWrite(FL_IN2, HIGH);
-		digitalWrite(FR_IN1, HIGH);
-		digitalWrite(FR_IN2, HIGH);
-		digitalWrite(RL_IN1, HIGH);
-		digitalWrite(RL_IN2, HIGH);
-		digitalWrite(RR_IN1, HIGH);
-		digitalWrite(RR_IN2, HIGH);
+		analogWrite(FL_EN, 0);
+		analogWrite(FR_EN, 0);
+		analogWrite(RL_EN, 0);
+		analogWrite(RR_EN, 0);
 	}
 }
 
