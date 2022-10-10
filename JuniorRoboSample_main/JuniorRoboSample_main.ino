@@ -31,48 +31,38 @@ void arm_frontback(int vy, int emg);      // アーム前後 動作
 //**********************
 
 // 駆動
-const int FL_IN1 = 1;			// 1番ピンに左前モータのIN1を接続
-const int FL_IN2 = 2;			// 2番ピンに左前モータのIN2を接続
-const int FL_EN  = 3;			// 3番ピンに左前モータのENAを接続
+const int FL_IN1 = 4;       //  4番ピンに左前モータのDIRを接続
+const int FL_EN  = 3;       //  3番ピンに左前モータのPWMを接続
 
-const int FR_IN1 = 4;			// 4番ピンに右前モータのIN3を接続
-const int FR_IN2 = 7;			// 7番ピンに右前モータのIN4を接続
-const int FR_EN  = 5;			// 5番ピンに右前モータのENBを接続
+const int FR_IN1 = 11;      // 11番ピンに右前モータのDIRを接続
+const int FR_EN  = 12;      // 12番ピンに右前モータのPWMを接続
 
-const int RL_IN1 = 8;			// 8番ピンに左後モータのIN1を接続
-const int RL_IN2 = 9;			// 9番ピンに左後モータのIN2を接続
-const int RL_EN  = 10;		// 10番ピンに左後モータのENAを接続
+const int RL_IN1 = 1;       //  1番ピンに左後モータのDIRを接続
+const int RL_EN  = 2;       //  2番ピンに左後モータのPWMを接続
 
-const int RR_IN1 = 12;		// 12番ピンに右後モータのIN3を接続
-const int RR_IN2 = 13;		// 13番ピンに右後モータのIN4を接続
-const int RR_EN  = 11;		// 11番ピンに右後モータのENBを接続
+const int RR_IN1 = 8;       //  8番ピンに右後モータのDIRを接続
+const int RR_EN  = 7;       //  7番ピンに右後モータのPWMを接続
 
 // アーム
-const int UPDN_IN1 = 1;		// 1番ピンに上下モータのIN1を接続
-const int UPDN_IN2 = 2;		// 2番ピンに上下モータのIN2を接続
-const int UPDN_EN  = 3;		// 3番ピンに上下モータのENAを接続
+const int UPDN_IN1 = 5;     //  5番ピンに上下モータのDIRを接続
+const int UPDN_EN  = 6;     //  6番ピンに上下モータのPWMを接続
 
-const int FRBK_IN1 = 4;		// 4番ピンに前後モータのIN3を接続
-const int FRBK_IN2 = 7;		// 7番ピンに前後モータのIN4を接続
-const int FRBK_EN  = 5;		// 5番ピンに前後モータのENBを接続
+const int FRBK_IN1 = 9;     //  9番ピンに前後モータのDIRを接続
+const int FRBK_EN  = 10;    // 10番ピンに前後モータのPWMを接続
 
 // アームリミット
-const int LM_UP = 3;			// 3番ピンにリミットスイッチ上を接続
-const int LM_DN = 4;			// 4番ピンにリミットスイッチ下を接続
+const int LM_UP = 48;       // 48番ピンにリミットスイッチ上を接続
+const int LM_DN = 42;       // 42番ピンにリミットスイッチ下を接続
 
-const int LM_FR = 3;			// 3番ピンにリミットスイッチ前を接続
-const int LM_BK = 4;			// 4番ピンにリミットスイッチ後を接続
+const int LM_FR = 36;       // 36番ピンにリミットスイッチ前を接続
+const int LM_BK = 30;       // 30番ピンにリミットスイッチ後を接続
 
 // ハンドサーボ
 Servo servo_hand;
-const int SRV_HAND = 8;   // 8番ピンにハンド用サーボモータのPWM入力を接続
+const int SRV_HAND = 13;    // 13番ピンにハンド用サーボモータのPWM入力を接続
 
 // その他
-const int stick_x = A0;		// Analog 0番ピンにアナログスティックX軸を接続
-const int stick_y = A1;		// Analog 1番ピンにアナログスティックY軸を接続
-
-const int SW1 = A3;				// Analog 3番ピンにスイッチ1を接続
-const int SW2 = A4;				// Analog 4番ピンにスイッチ2を接続
+const int TRANS_LED = A8;   // アナログ8番ピンに通信成功LEDを接続
 
 
 //**********************
@@ -86,8 +76,6 @@ void setup()
   pinInit_arm();                // アーム系ピン初期化
   servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
 
-	pinMode(SW1, INPUT_PULLUP);		// SW1を入力モード（プルアップあり）で使用
-	pinMode(SW2, INPUT_PULLUP);		// SW2を入力モード（プルアップあり）で使用
 }
 
 /////////////////////
