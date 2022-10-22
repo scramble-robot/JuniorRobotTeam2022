@@ -37,7 +37,7 @@ const int FL_PWM = 3;     // 3番ピンに左前モータのPWMを接続
 const int FR_DIR = 11;    // 11番ピンに右前モータのDIRを接続
 const int FR_PWM = 12;    // 12番ピンに右前モータのPWMを接続
 
-const int RL_DIR = 1;     // 1番ピンに左後モータのDIRを接続
+const int RL_DIR = 14;    // 14番ピンに左後モータのDIRを接続
 const int RL_PWM = 2;     // 2番ピンに左後モータのPWMを接続
 
 const int RR_DIR = 8;     // 8番ピンに右後モータのDIRを接続
