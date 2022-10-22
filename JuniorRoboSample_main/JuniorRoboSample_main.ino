@@ -25,6 +25,7 @@ void arm_frontback(int vy, int emg);      // アーム前後 動作
 #define   PWM_MAX         255				      // 最大出力
 
 #define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
+#define   TRANSERRCNT     10              // 通信失敗でエラーとする回数
 
 //**********************
 // ピン定義
@@ -75,7 +76,9 @@ void setup()
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
   pinInit_arm();                // アーム系ピン初期化
   servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
-
+  
+  pinMode(TRANS_LED, OUTPUT);   // 通信成功LED ピン設定
+  digitalWrite(TRANS_LED, LOW);
 }
 
 /////////////////////
@@ -115,6 +118,9 @@ void pinInit_arm(void)
 // ループ関数
 //**********************
 void loop(){
+  // 通信エラー検出回数
+  static int errcnt = 0;
+  
   // コントローラからデータを受信
   int serialCount = Serial2.available();
   for(int i=0; i<serialCount; i++){
@@ -123,6 +129,7 @@ void loop(){
     int data = Serial2.read();
     if((data&0x07)!=count){
       count = 0;
+      errcnt++;
       continue;
     }
     else{
@@ -132,8 +139,17 @@ void loop(){
         count = 0;
         // 受信データ解析
         dataProcess(rxData);
+        errcnt = 0;
+        digitalWrite(TRANS_LED, HIGH);  // 通信成功LED 点灯
       }
     }
+    
+    if(errcnt >= TRANSERRCNT){
+      errcnt = TRANSERRCNT;
+      digitalWrite(TRANS_LED, LOW);     // 通信成功LED 消灯
+      // ここに全停止指令を入れる
+    }
+    
   }
 }
 
