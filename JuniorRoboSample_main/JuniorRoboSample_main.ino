@@ -197,10 +197,10 @@ void dataProcess(uint8_t data[]){
 void FL_motor(int stopFlag, int inverse, int power) {
   if (!stopFlag) {
     if (inverse) {
-      digitalWrite(FL_DIR, HIGH);
+      digitalWrite(FL_DIR, LOW);
     }
     else {
-      digitalWrite(FL_DIR, LOW);
+      digitalWrite(FL_DIR, HIGH);
     }
     analogWrite(FL_PWM, power);
   }
@@ -214,10 +214,10 @@ void FL_motor(int stopFlag, int inverse, int power) {
 void FR_motor(int stopFlag, int inverse, int power) {
   if (!stopFlag) {
     if (inverse) {
-      digitalWrite(FR_DIR, LOW);
+      digitalWrite(FR_DIR, HIGH);
     }
     else {
-      digitalWrite(FR_DIR, HIGH);
+      digitalWrite(FR_DIR, LOW);
     }
     analogWrite(FR_PWM, power);
   }
@@ -231,10 +231,10 @@ void FR_motor(int stopFlag, int inverse, int power) {
 void RL_motor(int stopFlag, int inverse, int power) {
   if (!stopFlag) {
     if (inverse) {
-      digitalWrite(RL_DIR, HIGH);
+      digitalWrite(RL_DIR, LOW);
     }
     else {
-      digitalWrite(RL_DIR, LOW);
+      digitalWrite(RL_DIR, HIGH);
     }
     analogWrite(RL_PWM, power);
   }
@@ -248,11 +248,10 @@ void RL_motor(int stopFlag, int inverse, int power) {
 void RR_motor(int stopFlag, int inverse, int power) {
   if (!stopFlag) {
     if (inverse) {
-      digitalWrite(RR_DIR, LOW);
+      digitalWrite(RR_DIR, HIGH);
     }
     else {
-      digitalWrite(RR_DIR, HIGH);
-      Serial.println("LOW");
+      digitalWrite(RR_DIR, LOW);
     }
     analogWrite(RR_PWM, power);
   }
