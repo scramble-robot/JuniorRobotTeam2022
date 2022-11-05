@@ -190,7 +190,7 @@ void dataProcess(uint8_t data[]){
 //       emg: 動作許可 (0:NG,1:OK) 
 ///////////////////////////////////////////////////
 
-// 右前モータの動作指令
+// 左前モータの動作指令
 void FL_motor(int stopFlag, int inverse, int power) {
   if ( stopFlag != 0 ) {          // 動作NG
     // 停止
@@ -211,7 +211,7 @@ void FL_motor(int stopFlag, int inverse, int power) {
   }
 }
 
-// 左前モータの動作指令
+// 右前モータの動作指令
 void FR_motor(int stopFlag, int inverse, int power) {
   if ( stopFlag != 0 ) {          // 動作NG
     // 停止
@@ -232,7 +232,7 @@ void FR_motor(int stopFlag, int inverse, int power) {
   }
 }
 
-// 右後モータの動作指令
+// 左後モータの動作指令
 void RL_motor(int stopFlag, int inverse, int power) {
   if ( stopFlag != 0 ) {          // 動作NG
     // 停止
@@ -253,7 +253,7 @@ void RL_motor(int stopFlag, int inverse, int power) {
   }
 }
 
-// 左後モータの動作指令
+// 右後モータの動作指令
 void RR_motor(int stopFlag, int inverse, int power) {
   if ( stopFlag != 0 ) {          // 動作NG
     // 停止
