@@ -158,9 +158,6 @@ void dataProcess(uint8_t data[]){
   stick_val[2] = ( data[2]>>3 ) & 0x1f;  // 右 X(よこ) [0～30]
   stick_val[3] = ( data[3]>>3 ) & 0x1f;  // 右 Y(たて) [0～30]
   
-  stick_val[0] = stick_val[0] / 2;  // 左 X(よこ) [0～15]
-  stick_val[1] = stick_val[1] / 2;  // 左 Y(たて) [0～15]
-  
   // スイッチ情報
   sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]：動作許可
   sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]
@@ -169,7 +166,7 @@ void dataProcess(uint8_t data[]){
   
   if(sw4 == 0){
     // 駆動 動作
-    drive(stick_val[0]-7, stick_val[1]-7, sw1); // 1_X, 1_Y, sw1
+    drive(stick_val[0], stick_val[1], sw1); // 1_X, 1_Y, sw1
     // アーム前後 停止
     arm_frontback(0, 0);
   }
@@ -263,7 +260,8 @@ void RR_motor(int stopFlag, int inverse, int power) {
 
 void drive(int vx, int vy, int emg)
 {
-  vy = vy * -1;
+  vx = ( vx / 2 ) - 7;
+  vy = ( vy / 2 ) - 7;
   int dis = sqrt(vx * vx + vy * vy) ;
   Serial.println(dis);
   int deg = degrees(atan2(vy, vx));
