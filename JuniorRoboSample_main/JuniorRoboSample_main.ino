@@ -187,74 +187,90 @@ void dataProcess(uint8_t data[]){
 //              0(左に倒した状態)～15(触れてない)～30(右に倒した状態)
 //       vy:  スティックY方向(たて)の傾き
 //              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
-//       ena: 動作許可(0:NG,1:OK) 
+//       emg: 動作許可 (0:NG,1:OK) 
 ///////////////////////////////////////////////////
 
-// 右前モータの速度算出
+// 右前モータの動作指令
 void FL_motor(int stopFlag, int inverse, int power) {
-  if (!stopFlag) {
-    if (inverse) {
-      digitalWrite(FL_DIR, LOW);
-    }
-    else {
-      digitalWrite(FL_DIR, HIGH);
-    }
-    analogWrite(FL_PWM, power);
-  }
-  else {
+  if ( stopFlag != 0 ) {          // 動作NG
+    // 停止
     digitalWrite(FL_DIR, LOW);
     analogWrite(FL_PWM, 0);
   }
-}
-
-// 左前モータの速度算出
-void FR_motor(int stopFlag, int inverse, int power) {
-  if (!stopFlag) {
-    if (inverse) {
-      digitalWrite(FR_DIR, HIGH);
+  else {                          // 動作OK
+    if ( inverse == 0 ) {
+      // 前進
+      digitalWrite(FL_DIR, HIGH);
     }
     else {
-      digitalWrite(FR_DIR, LOW);
+      // 後退
+      digitalWrite(FL_DIR, LOW);
     }
-    analogWrite(FR_PWM, power);
+    // PWM出力
+    analogWrite(FL_PWM, power);
   }
-  else {
+}
+
+// 左前モータの動作指令
+void FR_motor(int stopFlag, int inverse, int power) {
+  if ( stopFlag != 0 ) {          // 動作NG
+    // 停止
     digitalWrite(FR_DIR, LOW);
     analogWrite(FR_PWM, 0);
   }
-}
-
-// 右後モータの速度算出
-void RL_motor(int stopFlag, int inverse, int power) {
-  if (!stopFlag) {
-    if (inverse) {
-      digitalWrite(RL_DIR, LOW);
+  else {                          // 動作OK
+    if ( inverse == 0 ) {
+      // 前進
+      digitalWrite(FR_DIR, LOW);
     }
     else {
-      digitalWrite(RL_DIR, HIGH);
+      // 後退
+      digitalWrite(FR_DIR, HIGH);
     }
-    analogWrite(RL_PWM, power);
+    // PWM出力
+    analogWrite(FR_PWM, power);
   }
-  else {
+}
+
+// 右後モータの動作指令
+void RL_motor(int stopFlag, int inverse, int power) {
+  if ( stopFlag != 0 ) {          // 動作NG
+    // 停止
     digitalWrite(RL_DIR, LOW);
     analogWrite(RL_PWM, 0);
   }
-}
-
-// 左後モータの速度算出
-void RR_motor(int stopFlag, int inverse, int power) {
-  if (!stopFlag) {
-    if (inverse) {
-      digitalWrite(RR_DIR, HIGH);
+  else {                          // 動作OK
+    if ( inverse == 0 ) {
+      // 前進
+      digitalWrite(RL_DIR, HIGH);
     }
     else {
-      digitalWrite(RR_DIR, LOW);
+      // 後退
+      digitalWrite(RL_DIR, LOW);
     }
-    analogWrite(RR_PWM, power);
+    // PWM出力
+    analogWrite(RL_PWM, power);
   }
-  else {
+}
+
+// 左後モータの動作指令
+void RR_motor(int stopFlag, int inverse, int power) {
+  if ( stopFlag != 0 ) {          // 動作NG
+    // 停止
     digitalWrite(RR_DIR, LOW);
     analogWrite(RR_PWM, 0);
+  }
+  else {                          // 動作OK
+    if (inverse == 0) {
+      // 前進
+      digitalWrite(RR_DIR, LOW);
+    }
+    else {
+      // 後退
+      digitalWrite(RR_DIR, HIGH);
+    }
+    // PWM出力
+    analogWrite(RR_PWM, power);
   }
 }
 
