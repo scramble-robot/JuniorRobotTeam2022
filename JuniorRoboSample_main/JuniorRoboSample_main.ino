@@ -10,7 +10,8 @@
 // プロトタイプ宣言
 void pinInit_drive(void);                 // 駆動系 ピン設定
 void pinInit_arm(void);                   // アーム系 ピン設定
-void drive(int vx, int vy, int emg);      // 駆動(メカナム)動作
+void drive(int vx, int vy, int emg, int turn_right, int turn_left);      
+                                          // 駆動(メカナム)動作
 void dataProcess(uint8_t data[]);         // 受信データ解析
 void arm_updown(int vy, int emg);         // アーム上下 動作
 void arm_frontback(int vy, int emg);      // アーム前後 動作
@@ -166,7 +167,7 @@ void dataProcess(uint8_t data[]){
   
   if(sw4 == 0){
     // 駆動 動作
-    drive(stick_val[0], stick_val[1], sw1); // 1_X, 1_Y, sw1
+    drive(stick_val[0], stick_val[1], sw1, sw3, sw2); // 1_X, 1_Y, sw1
     // アーム前後 停止
     arm_frontback(0, 0);
   }
@@ -174,7 +175,7 @@ void dataProcess(uint8_t data[]){
     // アーム前後 動作
     arm_frontback(stick_val[1], sw1); // 1_Y, sw1
     // 駆動 停止
-    drive(0, 0, 0);
+    drive(0, 0, 0, 0, 0);
   }
 
   // アーム上下 動作
@@ -274,7 +275,7 @@ void RR_motor(int stopFlag, int inverse, int power) {
   }
 }
 
-void drive(int vx, int vy, int emg)
+void drive(int vx, int vy, int emg, int turn_right, int turn_left)
 {
   vx = ( vx / 2 ) - 7;
   vy = ( vy / 2 ) - 7;
@@ -287,27 +288,27 @@ void drive(int vx, int vy, int emg)
   power = min(power, 255);
   Serial.println(power);
 
-//  if (sw1Flag != 0 && emg != 0) {
-//    FL_motor(0, 1, power);
-//    FR_motor(0, 0, power);
-//    RL_motor(0, 1, power);
-//    RR_motor(0, 0, power);
-//    Serial.println("turnLeft");
-//  }
-//  else if (sw2Flag != 0 && emg != 0) {
-//    FL_motor(0, 0, power);
-//    FR_motor(0, 1, power);
-//    RL_motor(0, 0, power);
-//    RR_motor(0, 1, power);
-//    Serial.println("turnRight");
-//  }
-
-  if (vx == 0 && vy == 0 || emg == 0) {
+  if (vx == 0 && vy == 0 && turn_right == 0 && turn_left == 0 || emg == 0) {
     FL_motor(1, 0, 0);
     FR_motor(1, 0, 0);
     RL_motor(1, 0, 0);
     RR_motor(1, 0, 0);
     Serial.println("stop");
+  }
+
+  else if (turn_left != 0) {
+    FL_motor(0, 1, 120);
+    FR_motor(0, 0, 120);
+    RL_motor(0, 1, 120);
+    RR_motor(0, 0, 120);
+    Serial.println("turnLeft");
+  }
+  else if (turn_right != 0) {
+    FL_motor(0, 0, 120);
+    FR_motor(0, 1, 120);
+    RL_motor(0, 0, 120);
+    RR_motor(0, 1, 120);
+    Serial.println("turnRight");
   }
 
   else if (-22 <= deg && deg < 23) {
