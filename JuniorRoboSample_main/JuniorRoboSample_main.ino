@@ -127,6 +127,12 @@ void loop(){
   
   // コントローラからデータを受信
   int serialCount = Serial2.available();
+
+  // 受信データなければエラーかも？
+  if( serialCount == 0 ){
+    errcnt++;
+  }
+  
   for(int i=0; i<serialCount; i++){
     static int count = 0;
     static uint8_t rxData[TRANSDATANUM];
@@ -147,13 +153,13 @@ void loop(){
         digitalWrite(TRANS_LED, HIGH);  // 通信成功LED 点灯
       }
     }
-    
-    if(errcnt >= TRANSERRCNT){
-      errcnt = TRANSERRCNT;
-      digitalWrite(TRANS_LED, LOW);     // 通信成功LED 消灯
-      // ここに全停止指令を入れる
-    }
-    
+  }
+  
+  // エラーが一定回数以上続いたら全部止める
+  if( errcnt >= TRANSERRCNT){
+    errcnt = TRANSERRCNT;
+    digitalWrite(TRANS_LED, LOW);     // 通信成功LED 消灯
+    // ここに全停止指令を入れる
   }
 }
 
