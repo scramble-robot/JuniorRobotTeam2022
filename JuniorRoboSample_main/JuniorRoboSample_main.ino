@@ -69,7 +69,7 @@ Servo servo_hand;
 const int SRV_HAND = 13;    // 13番ピンにハンド用サーボモータのPWM入力を接続
 
 // その他
-const int TRANS_LED = A8;   // アナログ8番ピンに通信成功LEDを接続
+const int TRANS_LED = 52;   // 52番ピンに通信成功LEDを接続
 
 
 //**********************
