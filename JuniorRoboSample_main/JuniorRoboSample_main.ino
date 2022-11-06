@@ -10,11 +10,13 @@
 // プロトタイプ宣言
 void pinInit_drive(void);                 // 駆動系 ピン設定
 void pinInit_arm(void);                   // アーム系 ピン設定
+void pinInit_hand(void);                  // サーボハンド ピン設定
 void drive(int vx, int vy, int emg, int turn_right, int turn_left);      
                                           // 駆動(メカナム)動作
 void dataProcess(uint8_t data[]);         // 受信データ解析
 void arm_updown(int vy, int emg);         // アーム上下 動作
 void arm_frontback(int vy, int emg);      // アーム前後 動作
+void hand_openclose(int sw, int emg);     // ハンドサーボ開閉 動作
 
 //**********************
 // 各種設定
@@ -24,6 +26,9 @@ void arm_frontback(int vy, int emg);      // アーム前後 動作
 #define   OUTVAL_MAX      30				      // コントローラから送信されるアナログスティック最大値
 #define   OUTVAL_HALF     (OUTVAL_MAX/2)	// 停止時のアナログスティック値
 #define   PWM_MAX         255				      // 最大出力
+
+#define   HAND_OPEN       0               // サーボハンドOPEN時の出力値
+#define   HAND_CLOSE      90              // サーボハンドCLOSE時の出力値
 
 #define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
 #define   TRANSERRCNT     10              // 通信失敗でエラーとする回数
@@ -77,7 +82,7 @@ void setup()
 
 	pinInit_drive();							// 駆動系(メカナム)ピン初期化
   pinInit_arm();                // アーム系ピン初期化
-  servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
+  pinInit_hand();               // ハンドサーボ初期化
   
   pinMode(TRANS_LED, OUTPUT);   // 通信成功LED ピン設定
   digitalWrite(TRANS_LED, LOW);
@@ -116,6 +121,14 @@ void pinInit_arm(void)
   pinMode(LM_DN, INPUT_PULLUP);   // リミットスイッチ下を入力モード（プルアップ）で使用
   pinMode(LM_FR, INPUT_PULLUP);   // リミットスイッチ前を入力モード（プルアップ）で使用
   pinMode(LM_BK, INPUT_PULLUP);   // リミットスイッチ後を入力モード（プルアップ）で使用
+}
+
+/////////////////////
+// ハンドサーボ 初期設定
+/////////////////////
+void pinInit_hand(void){
+  servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
+  servo_hand.write(HAND_OPEN);  // サーボモーターをOPEN位置まで動かす
 }
 
 //**********************
@@ -174,6 +187,8 @@ void dataProcess(uint8_t data[]){
   int sw2 = 0;        // コントローラ SW2
   int sw3 = 0;        // コントローラ SW3
   int sw4 = 0;        // コントローラ SW4
+  int sw5 = 0;        // コントローラ SW5
+  int sw6 = 0;        // コントローラ SW6
   
   // アナログスティック値の取り出し
   stick_val[0] = ( data[0]>>3 ) & 0x1f;  // 左 X(よこ) [0～30]
@@ -182,10 +197,12 @@ void dataProcess(uint8_t data[]){
   stick_val[3] = ( data[3]>>3 ) & 0x1f;  // 右 Y(たて) [0～30]
   
   // スイッチ情報
-  sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]：動作許可
-  sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]
-  sw3 = (data[4] >> 5) & 0x1; // コントローラ SW3 [0:OFF 1:ON]
-  sw4 = (data[4] >> 6) & 0x1; // コントローラ SW4 [0:OFF 1:ON]：駆動、アーム前後切替
+  sw1 = (data[4] >> 3) & 0x1; // コントローラ SW1 [0:OFF 1:ON]: 動作許可
+  sw2 = (data[4] >> 4) & 0x1; // コントローラ SW2 [0:OFF 1:ON]: 左旋回
+  sw3 = (data[4] >> 5) & 0x1; // コントローラ SW3 [0:OFF 1:ON]: 右旋回
+  sw4 = (data[4] >> 6) & 0x1; // コントローラ SW4 [0:OFF 1:ON]: 駆動、アーム前後切替
+  sw5 = (data[4] >> 7) & 0x1; // コントローラ SW5 [0:OFF 1:ON]: (未使用)
+  sw6 = (data[5] >> 3) & 0x1; // コントローラ SW6 [0:OFF 1:ON]: ハンドOPEN/CLOSE
   
   if(sw4 == 0){
     // 駆動 動作
@@ -202,6 +219,9 @@ void dataProcess(uint8_t data[]){
 
   // アーム上下 動作
   arm_updown(stick_val[3], sw1); // 2_Y, sw1
+
+  // ハンドサーボ開閉 動作
+  hand_openclose(sw6, sw1);
 }
 
 ///////////////////////////////////////////////////
@@ -456,4 +476,23 @@ void arm_frontback(int vy, int emg){
     }
     analogWrite(FRBK_EN, vy);
   }
+}
+
+///////////////////////////////////////////////////
+// ハンドサーボ 動作
+// in    sw:  ハンドサーボ 開閉指令 (0:OPEN 1:CLOSE)
+//       emg: 動作許可(0:NG,1:OK) 
+///////////////////////////////////////////////////
+void hand_openclose(int sw, int emg){
+  if( emg != 0){
+    if( sw == 0 ){
+      // OPEN
+      servo_hand.write(HAND_OPEN);          // サーボモーターをOPEN位置まで動かす
+    }
+    else{
+      // CLOSE
+      servo_hand.write(HAND_CLOSE);          // サーボモーターをCLOSE位置まで動かす
+    }
+  }
+  
 }
