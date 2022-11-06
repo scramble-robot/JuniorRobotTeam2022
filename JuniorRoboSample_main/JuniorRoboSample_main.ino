@@ -8,15 +8,19 @@
 #include <Servo.h>
 
 // プロトタイプ宣言
-void pinInit_drive(void);                 // 駆動系 ピン設定
-void pinInit_arm(void);                   // アーム系 ピン設定
-void pinInit_hand(void);                  // サーボハンド ピン設定
+void pinInit_drive(void);                             // 駆動系 ピン設定
+void pinInit_arm(void);                               // アーム系 ピン設定
+void pinInit_hand(void);                              // サーボハンド ピン設定
+void dataProcess(uint8_t data[]);                     // 受信データ解析
+void FL_motor(int stopFlag, int inverse, int power);  // 左前モータの動作指令
+void FR_motor(int stopFlag, int inverse, int power);  // 右前モータの動作指令
+void RL_motor(int stopFlag, int inverse, int power);  // 左後モータの動作指令
+void RR_motor(int stopFlag, int inverse, int power);  // 右後モータの動作指令
 void drive(int vx, int vy, int emg, int turn_right, int turn_left);      
-                                          // 駆動(メカナム)動作
-void dataProcess(uint8_t data[]);         // 受信データ解析
-void arm_updown(int vy, int emg);         // アーム上下 動作
-void arm_frontback(int vy, int emg);      // アーム前後 動作
-void hand_openclose(int sw, int emg);     // ハンドサーボ開閉 動作
+                                                      // 駆動(メカナム)動作
+void arm_updown(int vy, int emg);                     // アーム上下 動作
+void arm_frontback(int vy, int emg);                  // アーム前後 動作
+void hand_openclose(int sw, int emg);                 // ハンドサーボ開閉 動作
 
 //**********************
 // 各種設定
