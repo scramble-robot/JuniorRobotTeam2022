@@ -38,17 +38,17 @@ void hand_openclose(int sw, int emg);     // ハンドサーボ開閉 動作
 //**********************
 
 // 駆動
-const int FL_DIR = 4;     // 4番ピンに左前モータのDIRを接続
-const int FL_PWM = 3;     // 3番ピンに左前モータのPWMを接続
+const int FL_DIR = 4;       // 4番ピンに左前モータのDIRを接続
+const int FL_PWM = 3;       // 3番ピンに左前モータのPWMを接続
 
-const int FR_DIR = 11;    // 11番ピンに右前モータのDIRを接続
-const int FR_PWM = 12;    // 12番ピンに右前モータのPWMを接続
+const int FR_DIR = 11;      // 11番ピンに右前モータのDIRを接続
+const int FR_PWM = 12;      // 12番ピンに右前モータのPWMを接続
 
-const int RL_DIR = 14;    // 14番ピンに左後モータのDIRを接続
-const int RL_PWM = 2;     // 2番ピンに左後モータのPWMを接続
+const int RL_DIR = 14;      // 14番ピンに左後モータのDIRを接続
+const int RL_PWM = 2;       // 2番ピンに左後モータのPWMを接続
 
-const int RR_DIR = 8;     // 8番ピンに右後モータのDIRを接続
-const int RR_PWM = 7;     // 7番ピンに右後モータのPWMを接続
+const int RR_DIR = 8;       // 8番ピンに右後モータのDIRを接続
+const int RR_PWM = 7;       // 7番ピンに右後モータのPWMを接続
 
 // アーム
 const int UPDN_IN1 = 5;     //  5番ピンに上下モータのDIRを接続
@@ -80,11 +80,11 @@ void setup()
   Serial.begin(TRANS_BITRATE);
   Serial2.begin(TRANS_BITRATE);
 
-  pinInit_drive();              // 駆動系(メカナム)ピン初期化
-  pinInit_arm();                // アーム系ピン初期化
-  pinInit_hand();               // ハンドサーボ初期化
+  pinInit_drive();                // 駆動系(メカナム)ピン初期化
+  pinInit_arm();                  // アーム系ピン初期化
+  pinInit_hand();                 // ハンドサーボ初期化
   
-  pinMode(TRANS_LED, OUTPUT);   // 通信成功LED ピン設定
+  pinMode(TRANS_LED, OUTPUT);     // 通信成功LED ピン設定
   digitalWrite(TRANS_LED, LOW);
 }
 
@@ -93,17 +93,17 @@ void setup()
 /////////////////////
 void pinInit_drive(void)
 {
-  pinMode(FL_DIR, OUTPUT);    // FL_DIRを出力モードで使用
-  analogWrite(FL_PWM, 0);     // モータ出力初期化
+  pinMode(FL_DIR, OUTPUT);        // FL_DIRを出力モードで使用
+  analogWrite(FL_PWM, 0);         // モータ出力初期化
 
-  pinMode(FR_DIR, OUTPUT);    // FR_DIRを出力モードで使用
-  analogWrite(FR_PWM, 0);     // モータ出力初期化
+  pinMode(FR_DIR, OUTPUT);        // FR_DIRを出力モードで使用
+  analogWrite(FR_PWM, 0);         // モータ出力初期化
 
-  pinMode(RL_DIR, OUTPUT);    // RL_DIRを出力モードで使用
-  analogWrite(RL_PWM, 0);     // モータ出力初期化
+  pinMode(RL_DIR, OUTPUT);        // RL_DIRを出力モードで使用
+  analogWrite(RL_PWM, 0);         // モータ出力初期化
 
-  pinMode(RR_DIR, OUTPUT);    // RR_DIRを出力モードで使用
-  analogWrite(RR_PWM, 0);     // モータ出力初期化
+  pinMode(RR_DIR, OUTPUT);        // RR_DIRを出力モードで使用
+  analogWrite(RR_PWM, 0);         // モータ出力初期化
 }
 
 /////////////////////
@@ -127,8 +127,8 @@ void pinInit_arm(void)
 // ハンドサーボ 初期設定
 /////////////////////
 void pinInit_hand(void){
-  servo_hand.attach(SRV_HAND);  // ハンド用サーボ ピン設定
-  servo_hand.write(HAND_OPEN);  // サーボモーターをOPEN位置まで動かす
+  servo_hand.attach(SRV_HAND);    // ハンド用サーボ ピン設定
+  servo_hand.write(HAND_OPEN);    // サーボモーターをOPEN位置まで動かす
 }
 
 //**********************
@@ -206,19 +206,19 @@ void dataProcess(uint8_t data[]){
   
   if(sw4 == 0){
     // 駆動 動作
-    drive(stick_val[0], stick_val[1], sw1, sw3, sw2); // 1_X, 1_Y, sw1
+    drive(stick_val[0], stick_val[1], sw1, sw3, sw2); // 1_X, 1_Y
     // アーム前後 停止
     arm_frontback(0, 0);
   }
   else{
     // アーム前後 動作
-    arm_frontback(stick_val[1], sw1); // 1_Y, sw1
+    arm_frontback(stick_val[1], sw1); // 1_Y
     // 駆動 停止
     drive(0, 0, 0, 0, 0);
   }
 
   // アーム上下 動作
-  arm_updown(stick_val[3], sw1); // 2_Y, sw1
+  arm_updown(stick_val[3], sw1); // 2_Y
 
   // ハンドサーボ開閉 動作
   hand_openclose(sw6, sw1);
