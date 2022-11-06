@@ -23,9 +23,9 @@ void hand_openclose(int sw, int emg);     // ハンドサーボ開閉 動作
 //**********************
 #define   TRANS_BITRATE   115200          // 通信速度
 
-#define   OUTVAL_MAX      30				      // コントローラから送信されるアナログスティック最大値
-#define   OUTVAL_HALF     (OUTVAL_MAX/2)	// 停止時のアナログスティック値
-#define   PWM_MAX         255				      // 最大出力
+#define   OUTVAL_MAX      30              // コントローラから送信されるアナログスティック最大値
+#define   OUTVAL_HALF     (OUTVAL_MAX/2)  // 停止時のアナログスティック値
+#define   PWM_MAX         255             // 最大出力
 
 #define   HAND_OPEN       0               // サーボハンドOPEN時の出力値
 #define   HAND_CLOSE      90              // サーボハンドCLOSE時の出力値
@@ -78,9 +78,9 @@ const int TRANS_LED = 52;   // 52番ピンに通信成功LEDを接続
 void setup()
 {
   Serial.begin(TRANS_BITRATE);
-	Serial2.begin(TRANS_BITRATE);
+  Serial2.begin(TRANS_BITRATE);
 
-	pinInit_drive();							// 駆動系(メカナム)ピン初期化
+  pinInit_drive();              // 駆動系(メカナム)ピン初期化
   pinInit_arm();                // アーム系ピン初期化
   pinInit_hand();               // ハンドサーボ初期化
   
@@ -114,7 +114,7 @@ void pinInit_arm(void)
   pinMode(UPDN_IN1, OUTPUT);      // UPDN_IN1を出力モードで使用
   analogWrite(UPDN_EN, 0);        // モータ出力は0で初期化
 
-  pinMode(FRBK_IN1, OUTPUT);	  // FRBK_IN1を出力モードで使用
+  pinMode(FRBK_IN1, OUTPUT);      // FRBK_IN1を出力モードで使用
   analogWrite(FRBK_EN, 0);        // モータ出力は0で初期化
 
   pinMode(LM_UP, INPUT_PULLUP);   // リミットスイッチ上を入力モード（プルアップ）で使用
@@ -413,7 +413,7 @@ void drive(int vx, int vy, int emg, int turn_right, int turn_left)
     RL_motor(0, 1, power);
     RR_motor(1, 0, power);
     Serial.println("rightBack");
-	}
+  }
 }
 
 ///////////////////////////////////////////////////
@@ -426,7 +426,7 @@ void arm_updown(int vy, int emg){
   if(emg==0){
     // 停止
     digitalWrite(UPDN_IN1, LOW);
-    analogWrite(UPDN_EN, 0);		// モータ出力0％
+    analogWrite(UPDN_EN, 0);        // モータ出力0％
   }
   else{
     if(vy > OUTVAL_HALF && digitalRead(LM_UP) == 1){
@@ -457,7 +457,7 @@ void arm_frontback(int vy, int emg){
   if(emg==0){
     // 停止
     digitalWrite(FRBK_IN1, LOW);
-    analogWrite(FRBK_EN, 0);		// モータ出力0％
+    analogWrite(FRBK_EN, 0);        // モータ出力0％
   }
   else{
     if(vy > OUTVAL_HALF && digitalRead(LM_FR) == 1){
