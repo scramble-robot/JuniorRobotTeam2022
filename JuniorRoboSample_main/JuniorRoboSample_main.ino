@@ -55,11 +55,11 @@ const int RR_DIR = 8;       // 8番ピンに右後モータのDIRを接続
 const int RR_PWM = 7;       // 7番ピンに右後モータのPWMを接続
 
 // アーム
-const int UPDN_IN1 = 5;     //  5番ピンに上下モータのDIRを接続
-const int UPDN_EN  = 6;     //  6番ピンに上下モータのPWMを接続
+const int UPDN_DIR = 5;     //  5番ピンに上下モータのDIRを接続
+const int UPDN_PWM = 6;     //  6番ピンに上下モータのPWMを接続
 
-const int FRBK_IN1 = 9;     //  9番ピンに前後モータのDIRを接続
-const int FRBK_EN  = 10;    // 10番ピンに前後モータのPWMを接続
+const int FRBK_DIR = 9;     //  9番ピンに前後モータのDIRを接続
+const int FRBK_PWM = 10;    // 10番ピンに前後モータのPWMを接続
 
 // アームリミット
 const int LM_UP = 48;       // 48番ピンにリミットスイッチ上を接続
@@ -115,11 +115,11 @@ void pinInit_drive(void)
 /////////////////////
 void pinInit_arm(void)
 {
-  pinMode(UPDN_IN1, OUTPUT);      // UPDN_IN1を出力モードで使用
-  analogWrite(UPDN_EN, 0);        // モータ出力は0で初期化
+  pinMode(UPDN_DIR, OUTPUT);      // UPDN_DIRを出力モードで使用
+  analogWrite(UPDN_PWM, 0);       // モータ出力初期化
 
-  pinMode(FRBK_IN1, OUTPUT);      // FRBK_IN1を出力モードで使用
-  analogWrite(FRBK_EN, 0);        // モータ出力は0で初期化
+  pinMode(FRBK_DIR, OUTPUT);      // FRBK_DIRを出力モードで使用
+  analogWrite(FRBK_PWM, 0);       // モータ出力初期化
 
   pinMode(LM_UP, INPUT_PULLUP);   // リミットスイッチ上を入力モード（プルアップ）で使用
   pinMode(LM_DN, INPUT_PULLUP);   // リミットスイッチ下を入力モード（プルアップ）で使用
@@ -430,25 +430,25 @@ void drive(int vx, int vy, int move, int turn_right, int turn_left)
 void arm_updown(int vy, int move){
   if(move==0){
     // 停止
-    digitalWrite(UPDN_IN1, LOW);
-    analogWrite(UPDN_EN, 0);        // モータ出力0％
+    digitalWrite(UPDN_DIR, LOW);
+    analogWrite(UPDN_PWM, 0);
   }
   else{
     if(vy > OUTVAL_HALF && digitalRead(LM_UP) == 1){
       // 正回転(上方向)
-      digitalWrite(UPDN_IN1, LOW);
+      digitalWrite(UPDN_DIR, LOW);
       vy = ((vy-OUTVAL_HALF) * PWM_MAX) / OUTVAL_HALF;
     }
     else
     if(vy < OUTVAL_HALF && digitalRead(LM_DN) == 1){
       // 逆回転(下方向)
-      digitalWrite(UPDN_IN1, HIGH);
+      digitalWrite(UPDN_DIR, HIGH);
       vy = ((OUTVAL_HALF-vy) * PWM_MAX) / OUTVAL_HALF;
     }
     else{
       vy = 0;
     }
-    analogWrite(UPDN_EN, vy);
+    analogWrite(UPDN_PWM, vy);
   }
 }
 
@@ -461,25 +461,25 @@ void arm_updown(int vy, int move){
 void arm_frontback(int vy, int move){
   if(move==0){
     // 停止
-    digitalWrite(FRBK_IN1, LOW);
-    analogWrite(FRBK_EN, 0);        // モータ出力0％
+    digitalWrite(FRBK_DIR, LOW);
+    analogWrite(FRBK_PWM, 0);
   }
   else{
     if(vy > OUTVAL_HALF && digitalRead(LM_FR) == 1){
       // 正回転(前方向)
-      digitalWrite(FRBK_IN1, LOW);
+      digitalWrite(FRBK_DIR, LOW);
       vy = ((vy-OUTVAL_HALF) * PWM_MAX) / OUTVAL_HALF;
     }
     else
     if(vy < OUTVAL_HALF && digitalRead(LM_BK) == 1){
       // 逆回転(後方向)
-      digitalWrite(FRBK_IN1, HIGH);
+      digitalWrite(FRBK_DIR, HIGH);
       vy = ((OUTVAL_HALF-vy) * PWM_MAX) / OUTVAL_HALF;
     }
     else{
       vy = 0;
     }
-    analogWrite(FRBK_EN, vy);
+    analogWrite(FRBK_PWM, vy);
   }
 }
 
