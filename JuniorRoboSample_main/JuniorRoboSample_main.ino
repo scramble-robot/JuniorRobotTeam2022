@@ -16,11 +16,11 @@ void FL_motor(int stopFlag, int inverse, int power);  // 左前モータの動�
 void FR_motor(int stopFlag, int inverse, int power);  // 右前モータの動作指令
 void RL_motor(int stopFlag, int inverse, int power);  // 左後モータの動作指令
 void RR_motor(int stopFlag, int inverse, int power);  // 右後モータの動作指令
-void drive(int vx, int vy, int emg, int turn_right, int turn_left);      
+void drive(int vx, int vy, int move, int turn_right, int turn_left);      
                                                       // 駆動(メカナム)動作
-void arm_updown(int vy, int emg);                     // アーム上下 動作
-void arm_frontback(int vy, int emg);                  // アーム前後 動作
-void hand_openclose(int sw, int emg);                 // ハンドサーボ開閉 動作
+void arm_updown(int vy, int move);                    // アーム上下 動作
+void arm_frontback(int vy, int move);                 // アーム前後 動作
+void hand_openclose(int sw, int move);                // ハンドサーボ開閉 動作
 
 //**********************
 // 各種設定
@@ -314,15 +314,15 @@ void RR_motor(int stopFlag, int inverse, int power) {
 
 ///////////////////////////////////////////////////
 // 駆動 動作
-// in     vx:  スティックX方向(よこ)の傾き
+// in       vx:  スティックX方向(よこ)の傾き
 //                0(左に倒した状態)～15(触れてない)～30(右に倒した状態)
-//         vy:  スティックY方向(たて)の傾き
+//          vy:  スティックY方向(たて)の傾き
 //                0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
-//         emg: 動作許可 (0:NG,1:OK)
+//        move: 動作許可 (0:NG,1:OK)
 //  turn_right: 右旋回指令(1:右旋回)
 //  turn_left : 左旋回指令(1:左旋回)
 ///////////////////////////////////////////////////
-void drive(int vx, int vy, int emg, int turn_right, int turn_left)
+void drive(int vx, int vy, int move, int turn_right, int turn_left)
 {
   vx = ( vx / 2 ) - 7;
   vy = ( vy / 2 ) - 7;
@@ -335,7 +335,7 @@ void drive(int vx, int vy, int emg, int turn_right, int turn_left)
   power = min(power, 255);
   Serial.println(power);
 
-  if (vx == 0 && vy == 0 && turn_right == 0 && turn_left == 0 || emg == 0) {
+  if (vx == 0 && vy == 0 && turn_right == 0 && turn_left == 0 || move == 0) {
     FL_motor(1, 0, 0);
     FR_motor(1, 0, 0);
     RL_motor(1, 0, 0);
@@ -423,12 +423,12 @@ void drive(int vx, int vy, int emg, int turn_right, int turn_left)
 
 ///////////////////////////////////////////////////
 // アーム上下 動作
-// in    vy:  スティックY方向(たて)の傾き
-//              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
-//       emg: 動作許可(0:NG,1:OK) 
+// in      vy: スティックY方向(たて)の傾き
+//               0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
+//       move: 動作許可(0:NG,1:OK) 
 ///////////////////////////////////////////////////
-void arm_updown(int vy, int emg){
-  if(emg==0){
+void arm_updown(int vy, int move){
+  if(move==0){
     // 停止
     digitalWrite(UPDN_IN1, LOW);
     analogWrite(UPDN_EN, 0);        // モータ出力0％
@@ -454,12 +454,12 @@ void arm_updown(int vy, int emg){
 
 ///////////////////////////////////////////////////
 // アーム前後 動作
-// in    vy:  スティックY方向(たて)の傾き
-//              0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
-//       emg: 動作許可(0:NG,1:OK) 
+// in      vy: スティックY方向(たて)の傾き
+//                0(下に倒した状態)～15(触れてない)～30(上に倒した状態)
+//       move: 動作許可(0:NG,1:OK) 
 ///////////////////////////////////////////////////
-void arm_frontback(int vy, int emg){
-  if(emg==0){
+void arm_frontback(int vy, int move){
+  if(move==0){
     // 停止
     digitalWrite(FRBK_IN1, LOW);
     analogWrite(FRBK_EN, 0);        // モータ出力0％
@@ -485,11 +485,11 @@ void arm_frontback(int vy, int emg){
 
 ///////////////////////////////////////////////////
 // ハンドサーボ 動作
-// in    sw:  ハンドサーボ 開閉指令 (0:OPEN 1:CLOSE)
-//       emg: 動作許可(0:NG,1:OK) 
+// in      sw: ハンドサーボ 開閉指令 (0:OPEN 1:CLOSE)
+//       move: 動作許可(0:NG,1:OK) 
 ///////////////////////////////////////////////////
-void hand_openclose(int sw, int emg){
-  if( emg != 0){
+void hand_openclose(int sw, int move){
+  if( move != 0){
     if( sw == 0 ){
       // OPEN
       servo_hand.write(HAND_OPEN);          // サーボモーターをOPEN位置まで動かす
