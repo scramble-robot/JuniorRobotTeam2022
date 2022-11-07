@@ -29,6 +29,7 @@ void hand_openclose(int sw, int move);                // ハンドサーボ開�
 
 #define   OUTVAL_MAX      30              // コントローラから送信されるアナログスティック最大値
 #define   OUTVAL_HALF     (OUTVAL_MAX/2)  // 停止時のアナログスティック値
+#define   PWM_TURN        120             // 旋回時のPWM出力値
 #define   PWM_MAX         255             // 最大出力
 
 #define   HAND_OPEN       0               // サーボハンドOPEN時の出力値
@@ -344,17 +345,17 @@ void drive(int vx, int vy, int move, int turn_right, int turn_left)
   }
 
   else if (turn_left != 0) {
-    FL_motor(0, 1, 120);
-    FR_motor(0, 0, 120);
-    RL_motor(0, 1, 120);
-    RR_motor(0, 0, 120);
+    FL_motor(0, 1, PWM_TURN);
+    FR_motor(0, 0, PWM_TURN);
+    RL_motor(0, 1, PWM_TURN);
+    RR_motor(0, 0, PWM_TURN);
     Serial.println("turnLeft");
   }
   else if (turn_right != 0) {
-    FL_motor(0, 0, 120);
-    FR_motor(0, 1, 120);
-    RL_motor(0, 0, 120);
-    RR_motor(0, 1, 120);
+    FL_motor(0, 0, PWM_TURN);
+    FR_motor(0, 1, PWM_TURN);
+    RL_motor(0, 0, PWM_TURN);
+    RR_motor(0, 1, PWM_TURN);
     Serial.println("turnRight");
   }
 
