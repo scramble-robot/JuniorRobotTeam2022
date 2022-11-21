@@ -177,7 +177,10 @@ void loop(){
   if( errcnt >= TRANSERRCNT){
     errcnt = TRANSERRCNT;
     digitalWrite(TRANS_LED, LOW);     // 通信成功LED 消灯
-    // ここに全停止指令を入れる
+    // 全停止指令
+    drive(0, 0, 0, 0, 0);
+    arm_frontback(0, 0);
+    arm_updown(0, 0);
   }
 }
 
