@@ -314,18 +314,9 @@ void RR_motor(int inverse, int power) {
 ///////////////////////////////////////////////////
 void drive(int vx, int vy, int turn_right, int turn_left)
 {
-  vx = ( vx / 2 ) - 7;
-  vy = ( vy / 2 ) - 7;
-  int dis = sqrt(vx * vx + vy * vy) ;
-  Serial.println(dis);
-  int deg = degrees(atan2(vy, vx));
-  double p = (double)dis / 8;
-  Serial.println(p);
-  int power = (int)(255 * p);
-  power = min(power, 255);
-  Serial.println(power);
 
   if (turn_left != 0) {
+    // 左旋回スイッチがON
     FL_motor(1, PWM_TURN);
     FR_motor(0, PWM_TURN);
     RL_motor(1, PWM_TURN);
@@ -333,80 +324,103 @@ void drive(int vx, int vy, int turn_right, int turn_left)
     Serial.println("turnLeft");
   }
   else if (turn_right != 0) {
+    // 右旋回スイッチがON
     FL_motor(0, PWM_TURN);
     FR_motor(1, PWM_TURN);
     RL_motor(0, PWM_TURN);
     RR_motor(1, PWM_TURN);
     Serial.println("turnRight");
   }
-
-  else if (-22 <= deg && deg < 23) {
-    FL_motor(0, power);
-    FR_motor(1, power);
-    RL_motor(1, power);
-    RR_motor(0, power);
-    Serial.println("right");
-  }
-
-  else if (-23 <= deg && deg < 68) {
-    FL_motor(0, power);
-    FR_motor(0, 0);
-    RL_motor(0, 0);
-    RR_motor(0, power);
-    Serial.println("rightForward");
-  }
-  else if (68 <= deg && deg < 113) {
-    FL_motor(0, power);
-    FR_motor(0, power);
-    RL_motor(0, power);
-    RR_motor(0, power);
-    Serial.println("forward");
-  }
-  else if (113 <= deg && deg < 158) {
-    FL_motor(0, 0);
-    FR_motor(0, power);
-    RL_motor(0, power);
-    RR_motor(0, 0);
-    Serial.println("leftForward");
-  }
-
-  else if (158 <= deg && deg <= 180 || -180 <= deg && deg < -157) {
-    FL_motor(1, power);
-    FR_motor(0, power);
-    RL_motor(0, power);
-    RR_motor(1, power);
-    Serial.println("left");
-  }
-
-  else if (-157 <= deg && deg < -112) {
-    FL_motor(1, power);
-    FR_motor(0, 0);
-    RL_motor(0, 0);
-    RR_motor(1, power);
-    Serial.println("leftBack");
-  }
-
-  else if (-112 <= deg && deg < -67) {
-    FL_motor(1, power);
-    FR_motor(1, power);
-    RL_motor(1, power);
-    RR_motor(1, power);
-    Serial.println("back");
-  }
-
-  else if (-67 <= deg && deg < -22) {
-    FL_motor(0, 0);
-    FR_motor(1, power);
-    RL_motor(1, power);
-    RR_motor(0, 0);
-    Serial.println("rightBack");
-  }
-  else{
+  else if(vx == OUTVAL_HALF && vy == OUTVAL_HALF){
+    // アナログスティックが倒れていない
     FL_motor(0, 0);
     FR_motor(0, 0);
     RL_motor(0, 0);
     RR_motor(0, 0);
     Serial.println("stop");
+  }
+  else{
+    // 旋回スイッチがどちらもOFF && アナログスティックが倒れている
+
+    // 0～30 を -7～8に換算
+    // -7(左に倒した状態)～0(触れてない)～8(右に倒した状態)
+    vx = ( vx / 2 ) - 7;
+    vy = ( vy / 2 ) - 7;
+
+    // アナログスティックの傾きから移動方向と速度を計算
+    int dis = sqrt(vx * vx + vy * vy) ;
+    Serial.println(dis);
+    int deg = degrees(atan2(vy, vx));
+    double p = (double)dis / 8;
+    Serial.println(p);
+    int power = (int)(PWM_MAX * p);
+    power = min(power, PWM_MAX);
+    Serial.println(power);
+    
+    // 角度によってモータの動作方向を切り替える
+    if (-22 <= deg && deg < 23) {
+      FL_motor(0, power);
+      FR_motor(1, power);
+      RL_motor(1, power);
+      RR_motor(0, power);
+      Serial.println("right");
+    }
+    else if (-23 <= deg && deg < 68) {
+      FL_motor(0, power);
+      FR_motor(0, 0);
+      RL_motor(0, 0);
+      RR_motor(0, power);
+      Serial.println("rightForward");
+    }
+    else if (68 <= deg && deg < 113) {
+      FL_motor(0, power);
+      FR_motor(0, power);
+      RL_motor(0, power);
+      RR_motor(0, power);
+      Serial.println("forward");
+    }
+    else if (113 <= deg && deg < 158) {
+      FL_motor(0, 0);
+      FR_motor(0, power);
+      RL_motor(0, power);
+      RR_motor(0, 0);
+      Serial.println("leftForward");
+    }
+    else if (158 <= deg && deg <= 180 || -180 <= deg && deg < -157) {
+      FL_motor(1, power);
+      FR_motor(0, power);
+      RL_motor(0, power);
+      RR_motor(1, power);
+      Serial.println("left");
+    }
+    else if (-157 <= deg && deg < -112) {
+      FL_motor(1, power);
+      FR_motor(0, 0);
+      RL_motor(0, 0);
+      RR_motor(1, power);
+      Serial.println("leftBack");
+    }
+    else if (-112 <= deg && deg < -67) {
+      FL_motor(1, power);
+      FR_motor(1, power);
+      RL_motor(1, power);
+      RR_motor(1, power);
+      Serial.println("back");
+    }
+    else if (-67 <= deg && deg < -22) {
+      FL_motor(0, 0);
+      FR_motor(1, power);
+      RL_motor(1, power);
+      RR_motor(0, 0);
+      Serial.println("rightBack");
+    }
+    else{
+      FL_motor(0, 0);
+      FR_motor(0, 0);
+      RL_motor(0, 0);
+      RR_motor(0, 0);
+      Serial.println("stop");
+    }
   }
 }
 
