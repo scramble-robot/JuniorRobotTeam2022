@@ -38,6 +38,7 @@ void hand_openclose(int sw, int move);                // ハンドサーボ開�
 #define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
 #define   TRANSERRCNT     10              // 通信失敗でエラーとする回数
 
+
 //**********************
 // ピン定義
 //**********************
@@ -82,15 +83,15 @@ const int TRANS_LED = 52;   // 52番ピンに通信成功LEDを接続
 //**********************
 void setup()
 {
-  Serial.begin(TRANS_BITRATE);
-  Serial2.begin(TRANS_BITRATE);
+  Serial.begin(TRANS_BITRATE);    // デバッグ用シリアル通信 初期化
+  Serial2.begin(TRANS_BITRATE);   // コントローラとのシリアル通信 初期化
 
   pinInit_drive();                // 駆動系(メカナム)ピン初期化
   pinInit_arm();                  // アーム系ピン初期化
   pinInit_hand();                 // ハンドサーボ初期化
   
   pinMode(TRANS_LED, OUTPUT);     // 通信成功LED ピン設定
-  digitalWrite(TRANS_LED, LOW);
+  digitalWrite(TRANS_LED, LOW);   // 通信成功LED 消灯
 }
 
 /////////////////////
