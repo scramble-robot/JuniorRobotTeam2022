@@ -137,6 +137,15 @@ void pinInit_hand(void){
   servo_hand.write(HAND_OPEN);    // サーボモーターをOPEN位置まで動かす
 }
 
+/////////////////////
+// モータ全停止
+/////////////////////
+void mtr_all_stop(void){
+  drive(0, 0, 0, 0, 0);
+  arm_frontback(0, 0);
+  arm_updown(0, 0);
+}
+
 //**********************
 // ループ関数
 //**********************
@@ -179,9 +188,7 @@ void loop(){
     errcnt = TRANSERRCNT;
     digitalWrite(TRANS_LED, LOW);     // 通信成功LED 消灯
     // 全停止指令
-    drive(0, 0, 0, 0, 0);
-    arm_frontback(0, 0);
-    arm_updown(0, 0);
+    mtr_all_stop();
   }
 }
 
