@@ -365,7 +365,7 @@ void drive(int vx, int vy, int turn_right, int turn_left)
       RR_motor(0, power);
       Serial.println("right");
     }
-    else if (-23 <= deg && deg < 68) {
+    else if (23 <= deg && deg < 68) {
       FL_motor(0, power);
       FR_motor(0, 0);
       RL_motor(0, 0);
