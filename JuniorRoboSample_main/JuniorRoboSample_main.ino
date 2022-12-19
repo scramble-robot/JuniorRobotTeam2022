@@ -25,7 +25,7 @@ void hand_openclose(int sw);                          // ハンドサーボ開�
 //**********************
 // 各種設定
 //**********************
-#define   TRANS_BITRATE   115200          // 通信速度
+#define   TRANS_BITRATE   115200          // 通信速度[bps]
 
 #define   OUTVAL_MAX      30              // コントローラから送信されるアナログスティック最大値
 #define   OUTVAL_HALF     (OUTVAL_MAX/2)  // 停止時のアナログスティック値
