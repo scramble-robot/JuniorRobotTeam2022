@@ -33,7 +33,8 @@ const int SW1 = 6;    //  6番ピンにスイッチ1を接続：コントロー�
 const int SW2 = 7;    //  7番ピンにスイッチ2を接続：左旋回
 const int SW3 = 8;    //  8番ピンにスイッチ3を接続：右旋回
 const int SW4 = 9;    //  9番ピンにスイッチ4を接続：駆動、アーム切り替え
-const int SW5 = 11;   // 11番ピンにスイッチ5を接続：ハンド開閉
+const int SW5 = 11;   // 11番ピンにスイッチ5を接続：未使用
+const int SW6 = 12;   // 12番ピンにスイッチ6を接続：ハンド開閉
 
 enum WRITE_DATA{
   DATA_STICK1_X = 0,
@@ -52,6 +53,7 @@ void setup() {
   pinMode(SW3, INPUT_PULLUP);
   pinMode(SW4, INPUT_PULLUP);
   pinMode(SW5, INPUT_PULLUP);
+  pinMode(SW6, INPUT_PULLUP);
 }
 
 const int T_S = 10000;        // 制御のサンプリング周期 (usec)
@@ -66,6 +68,7 @@ void loop() {
   int swt3 = 1;
   int swt4 = 1;
   int swt5 = 1;
+  int swt6 = 1;
   
   for (int i=0; i<MAX_STICK; i++){  // STICKの本数分、繰り返す
     // 値取得
@@ -108,6 +111,9 @@ void loop() {
   if(digitalRead(SW5)){
     swt5 = 0;
   }
+  if(digitalRead(SW6)){
+    swt6 = 0;
+  }
   
   uint8_t data[MAX_WRITEDATA] = {0,1,2,3,4,5};
 
@@ -120,6 +126,7 @@ void loop() {
   data[DATA_SW1] |= (swt3 & 0x1) << 5;
   data[DATA_SW1] |= (swt4 & 0x1) << 6;
   data[DATA_SW1] |= (swt5 & 0x1) << 7;
+  data[DATA_SW2] |= (swt6 & 0x1) << 3;
   
   for(int i=0;i<MAX_WRITEDATA;i++){
     Serial.write(data[i]);
