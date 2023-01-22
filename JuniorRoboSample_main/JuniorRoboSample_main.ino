@@ -351,7 +351,7 @@ void drive(int vx, int vy, int turn_right, int turn_left)
     int dis = sqrt(vx * vx + vy * vy) ;
     Serial.println(dis);
     int deg = degrees(atan2(vy, vx));
-    double p = (double)dis / 8;
+    double p = (double)dis / 7;
     Serial.println(p);
     int power = (int)(PWM_MAX * p);
     power = min(power, PWM_MAX);
