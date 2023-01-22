@@ -35,6 +35,7 @@ void hand_openclose(int sw);                          // ハンドサーボ開�
 #define   HAND_OPEN       0               // サーボハンドOPEN時の出力値
 #define   HAND_CLOSE      90              // サーボハンドCLOSE時の出力値
 
+#define   T_S             10000           // loop関数のサンプリング周期[usec]
 #define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
 #define   TRANSERRCNT     10              // 通信失敗でエラーとする回数
 
@@ -141,15 +142,21 @@ void pinInit_hand(void){
 // モータ全停止
 /////////////////////
 void mtr_all_stop(void){
-  drive(0, 0, 0, 0);
-  arm_frontback(0);
-  arm_updown(0);
+  drive(OUTVAL_HALF, OUTVAL_HALF, 0, 0);
+  arm_frontback(OUTVAL_HALF);
+  arm_updown(OUTVAL_HALF);
 }
 
 //**********************
 // ループ関数
 //**********************
 void loop(){
+  // 各周期の開始時間と終了時間[usec]
+  long int startTime, endTime;
+  
+  // 制御周期開始時間を保存
+  startTime = micros();
+  
   // 通信エラー検出回数
   static int errcnt = 0;
   
@@ -190,6 +197,12 @@ void loop(){
     // 全停止指令
     mtr_all_stop();
   }
+  
+  // 制御周期終了時間を保存
+  endTime = micros();
+  
+  // 制御周期開始からT_S[us]経つまで待つ (既に過ぎていたら待たない)
+  delayMicroseconds(max(0, startTime + T_S - endTime));
 }
 
 ///////////////////////////////////////////////////
@@ -228,13 +241,13 @@ void dataProcess(uint8_t data[]){
     // 動作許可SWがON  → 動いてよい
     if(sw4 == 0){
       // アーム前後 停止
-      arm_frontback(0);
+      arm_frontback(OUTVAL_HALF);
       // 駆動 動作
       drive(stick_val[0], stick_val[1], sw3, sw2); // 左_X, 左_Y, 右旋回ボタン, 左旋回ボタン
     }
     else{
       // 駆動 停止
-      drive(0, 0, 0, 0);
+      drive(OUTVAL_HALF, OUTVAL_HALF, 0, 0);
       // アーム前後 動作
       arm_frontback(stick_val[1]);  // 左_Y
     }
@@ -351,7 +364,7 @@ void drive(int vx, int vy, int turn_right, int turn_left)
     int dis = sqrt(vx * vx + vy * vy) ;
     Serial.println(dis);
     int deg = degrees(atan2(vy, vx));
-    double p = (double)dis / 8;
+    double p = (double)dis / 7;
     Serial.println(p);
     int power = (int)(PWM_MAX * p);
     power = min(power, PWM_MAX);
