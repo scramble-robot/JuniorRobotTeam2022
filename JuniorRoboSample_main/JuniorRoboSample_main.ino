@@ -141,9 +141,9 @@ void pinInit_hand(void){
 // モータ全停止
 /////////////////////
 void mtr_all_stop(void){
-  drive(0, 0, 0, 0);
-  arm_frontback(0);
-  arm_updown(0);
+  drive(OUTVAL_HALF, OUTVAL_HALF, 0, 0);
+  arm_frontback(OUTVAL_HALF);
+  arm_updown(OUTVAL_HALF);
 }
 
 //**********************
@@ -228,13 +228,13 @@ void dataProcess(uint8_t data[]){
     // 動作許可SWがON  → 動いてよい
     if(sw4 == 0){
       // アーム前後 停止
-      arm_frontback(0);
+      arm_frontback(OUTVAL_HALF);
       // 駆動 動作
       drive(stick_val[0], stick_val[1], sw3, sw2); // 左_X, 左_Y, 右旋回ボタン, 左旋回ボタン
     }
     else{
       // 駆動 停止
-      drive(0, 0, 0, 0);
+      drive(OUTVAL_HALF, OUTVAL_HALF, 0, 0);
       // アーム前後 動作
       arm_frontback(stick_val[1]);  // 左_Y
     }
