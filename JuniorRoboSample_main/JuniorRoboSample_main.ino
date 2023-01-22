@@ -35,6 +35,7 @@ void hand_openclose(int sw);                          // ハンドサーボ開�
 #define   HAND_OPEN       0               // サーボハンドOPEN時の出力値
 #define   HAND_CLOSE      90              // サーボハンドCLOSE時の出力値
 
+#define   T_S             10000           // loop関数のサンプリング周期[usec]
 #define   TRANSDATANUM    6               // コントローラから1度に届くデータ個数
 #define   TRANSERRCNT     10              // 通信失敗でエラーとする回数
 
@@ -150,6 +151,12 @@ void mtr_all_stop(void){
 // ループ関数
 //**********************
 void loop(){
+  // 各周期の開始時間と終了時間[usec]
+  long int startTime, endTime;
+  
+  // 制御周期開始時間を保存
+  startTime = micros();
+  
   // 通信エラー検出回数
   static int errcnt = 0;
   
@@ -190,6 +197,12 @@ void loop(){
     // 全停止指令
     mtr_all_stop();
   }
+  
+  // 制御周期終了時間を保存
+  endTime = micros();
+  
+  // 制御周期開始からT_S[us]経つまで待つ (既に過ぎていたら待たない)
+  delayMicroseconds(max(0, startTime + T_S - endTime));
 }
 
 ///////////////////////////////////////////////////
